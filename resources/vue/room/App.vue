@@ -13,6 +13,7 @@ export default {
 	},
 	data: () => ({
 		url: location.href,
+		apiPath: '..',
 		isLoading: true,
 		rooms: [],
 		playersOnRoom: [],
@@ -65,7 +66,7 @@ export default {
 			this.form.player.roomid = 0;
 			this.errors = [];
 			axios
-				.get(this.url + '/api/v1/room/getAll', this.param)
+				.get(this.apiPath + '/api/v1/room/getAll', this.param)
 				.then((response) => {
 					this.isLoading = false;
 					try {
@@ -180,7 +181,7 @@ export default {
 		createRoom(){
 			this.form.room.step = 3;
 			axios
-			.post(this.url+ '/api/v1/room/create', {
+			.post(this.apiPath + '/api/v1/room/create', {
 				params: this.form.room,
 			})
 			.then((response) => {
