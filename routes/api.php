@@ -23,9 +23,6 @@ Route::prefix('/v1')->group(function () {
         Route::get('getAll', [RoomV1::Class, 'getAll']);
         Route::post('create', [RoomV1::Class, 'create']);
     });
-    Route::prefix('/work')->group(function () {
-        Route::get('getAll', [WorkV1::Class, 'getAll']);
-    });
     Route::prefix('/player')->group(function () {
         Route::post('create', [PlayerV1::Class, 'create']);
     });
