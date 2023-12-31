@@ -13,7 +13,7 @@ export default {
 	},
 	data: () => ({
 		url: location.href,
-		apiPath: location.origin,
+		rootPath: '',
 		isLoading: true,
 		rooms: [],
 		playersOnRoom: [],
@@ -52,6 +52,9 @@ export default {
 		se: Const.data.se,
 	}),
 	created: function () {
+		if(this.url.indexOf('/room') != -1){
+			this.rootPath = this.url.split('/room')[0];
+		}
 		this.loadRooms();
 	},
 	mounted() {
@@ -66,7 +69,7 @@ export default {
 			this.form.player.roomid = 0;
 			this.errors = [];
 			axios
-				.get(this.apiPath + '/api/v1/room/getAll', this.param)
+				.get(this.rootPath + '/api/v1/room/getAll', this.param)
 				.then((response) => {
 					this.isLoading = false;
 					try {
@@ -181,7 +184,7 @@ export default {
 		createRoom(){
 			this.form.room.step = 3;
 			axios
-			.post(this.apiPath + '/api/v1/room/create', {
+			.post(this.rootPath + '/api/v1/room/create', {
 				params: this.form.room,
 			})
 			.then((response) => {
