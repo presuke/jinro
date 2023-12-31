@@ -13,7 +13,7 @@ export default {
 	},
 	data: () => ({
 		url: location.href,
-		apiPath: '..',
+		apiPath: location.origin,
 		isLoading: true,
 		rooms: [],
 		playersOnRoom: [],
