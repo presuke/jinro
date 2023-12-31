@@ -1,5 +1,6 @@
 <script>
 import axios from 'axios';
+import VueQrcode from '@chenfengyuan/vue-qrcode';
 import Header from '../Header.vue';
 import Footer from '../Footer.vue';
 import Const from '../../js/const.js';
@@ -8,8 +9,10 @@ export default {
 	components: {
 		Header,
 		Footer,
+		VueQrcode,
 	},
 	data: () => ({
+		url: location.href,
 		isLoading: true,
 		rooms: [],
 		playersOnRoom: [],
@@ -37,6 +40,11 @@ export default {
 				},
 				name: '',
 				roles:Const.data.roles,
+				role: {
+					name: '',
+					description: '',
+				},
+				playerNum: 0,
 				error: '',
 			}, //カンマを追加
 		},
@@ -96,7 +104,7 @@ export default {
 				this.form.player = player;
 				this.form.player.step = 2;
 			}else{
-				location.href = './play/' + player.id;
+				location.href = '../play/' + player.id;
 			}
 		},
 		createPlayer(){
@@ -191,6 +199,10 @@ export default {
 				this.se.Error.play();
 			});
 		},
+		showDescription(role){
+			this.form.room.role.name = role.name;
+			this.form.room.role.description = role.description;
+		},
 		changeNum(role, num){
 			this.se.Push.play();
 			if(num > 0 || role.num != 0){
@@ -209,12 +221,14 @@ export default {
 			team.peaple = 0;
 			team.jinro = 0;
 			this.form.room.roles.forEach(role => {
-				if(role.id == 1 || role.id == 5){
+				if(role.id == 1 || role.id == 5 || role.id == 7
+				){
 					team.jinro += role.num;
 				}else{
 					team.peaple += role.num;
 				}
 			});
+			this.form.room.playerNum = team.jinro + team.peaple;
 			return team;
 		},
 		checkString(inputdata) {
@@ -527,7 +541,7 @@ export default {
 						</v-card-title>
 						<v-card-text>
 							<img 
-								:src="'./image/avatar/' + form.player.sex + '/icon0' + form.player.img + '.png'" 
+								:src="'../image/avatar/' + form.player.sex + '/icon0' + form.player.img + '.png'" 
 								class="rounded-circle"
 								/>
 							<div>
@@ -557,6 +571,10 @@ export default {
 				</div>
 				<div style="text-align: center;">
 					各役割の人数を設定してください。
+					<div>
+						現在のプレイヤー数：{{ this.form.room.playerNum }}
+					</div>
+
 					<div v-for="role in form.room.roles" 
 					style="margin:0 auto; width:min(80vw, 600px);"
 					>
@@ -564,6 +582,7 @@ export default {
 							<div 
 							class="role"
 							:style="{ backgroundImage: `url('${role.img}')` }"
+							@click="this.showDescription(role)"
 							>
 								<div class="num">
 									{{ role.num }}
@@ -581,6 +600,17 @@ export default {
 								</div>
 							</div>
 						</div>
+					</div>
+				</div>
+				<div 
+				v-bind:class="[form.room.role.name!='' ? 'scaleShow' : 'scaleHide']"
+				style="clear:both; border-radius: 5px; border: solid 1px yellow; padding:5px; margin:10px;"
+				>
+					<div>
+						役割説明　【{{ this.form.room.role.name }}】
+					</div>
+					<div style="margin: 10px;">
+						{{ this.form.room.role.description }}
 					</div>
 				</div>
 				<br  style="clear:left;" />
@@ -659,6 +689,7 @@ export default {
 				</v-btn>
 			</div>
 		</v-card>
+		<VueQrcode :value="url" :options="{ width: 200 }" />
 		<footer>
 			<Footer></Footer>
 		</footer>

@@ -27,7 +27,7 @@ Route::get('/play/{any?}', function () {
     '.*'
 );
 
-Route::get('/}', function () {
+Route::get('/', function () {
     return view('index');
 })->where(
     'any',

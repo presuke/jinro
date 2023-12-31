@@ -55,6 +55,14 @@ export default {
 			countValue: 40,
 			message: '',
 		},
+		countdown:{
+			const:{
+				interval: 1000,
+			},
+			timer: '',
+			action: '',
+			sec: 0,
+		},
 		dialog:{
 			login:{
 				show: false,
@@ -177,6 +185,20 @@ export default {
 				}
 			}, this.reflesh.const.interval);
 		},
+		startCountDownTimer(){
+			clearInterval(this.countdown.timer);
+			this.countdown.timer = null;
+			this.countdown.timer = setInterval(()=>{
+				if(this.countdown.sec == 0){
+					clearInterval(this.countdown.timer);
+					this.countdown.timer = null;
+					this.info = this.countdown.action + 'の締め切り時間が来ました。他のプレイヤーが' + this.countdown.action + 'を変更しなければ結果発表に移ります。';
+				}else{
+					this.info = 'あと'+ this.countdown.sec + '秒で' + this.countdown.action + 'を締め切ります。変更があるならお早めに';
+				}
+				this.countdown.sec--;
+			}, this.countdown.const.interval);
+		},
 		refleshStatus() {
 			//部屋の状況を取得
 			this.authtoken = localStorage.getItem(this.const.authTokenName);
@@ -226,6 +248,12 @@ export default {
 									});
 									this.players[idx] = player;
 								}
+								//投票終了までのカウントダウン
+								if(this.info.countdown != undefined){
+									this.countdown.sec = response.info.countdown.sec;
+									this.countdown.action = response.info.countdown.action;
+									this.startCountDownTimer();
+								}
 								break;
 							}
 							//投票結果
@@ -270,6 +298,11 @@ export default {
 								const message = 'あなたは' + this.me.role.name + 'です。さぁ、あなたがやるべきことをやってください。';
 								if(this.info == undefined){
 									this.info.message = message;
+								}else if(this.info.countdown != undefined){
+									//行動終了までのカウントダウン
+									this.countdown.sec = response.info.countdown.sec;
+									this.countdown.action = response.info.countdown.action;
+									this.startCountDownTimer();
 								}else if(this.info.message == undefined){
 									this.info.message = message;
 								}
@@ -352,7 +385,7 @@ export default {
 								let lstPeaple = [];
 								this.players.forEach((player) => {
 									if(player.flgDead == 0){
-										if(player.roleid == 1 || player.roleid ==5){
+										if(player.roleid == 1 || player.roleid ==5 || player.roleid == 7){
 											lstJinro.push(player);
 										}else if(player.role != undefined){
 											lstPeaple.push(player);
@@ -847,7 +880,7 @@ export default {
 		max-width="400"
 		class="dialog"
 		>
-			<v-card width="320" height="400">
+			<v-card width="320" height="580">
 				<v-card-title>
 					あなたのカード
 				</v-card-title>
@@ -860,6 +893,9 @@ export default {
 						<div style="width:100%; text-align:cener; background-color:rgba(0, 0, 0, 0.5);">
 							{{ this.me.role.name }}
 						</div>
+					</div>
+					<div style="width:100%; text-align:cener; background-color:rgba(0, 0, 0, 0.5);">
+						{{ this.me.role.description }}
 					</div>
 				</v-card-text>
 				<v-card-actions>

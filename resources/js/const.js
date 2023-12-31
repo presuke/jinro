@@ -26,6 +26,7 @@ export default {
             {
                 id: 0,
                 name:'村人',
+                description:'特殊能力を持ちません。',
                 img: ImgC0,
                 color: 'gray',
                 num: 0,
@@ -34,6 +35,7 @@ export default {
             {
                 id: 1,
                 name:'人狼',
+                description:'襲撃対象を投獄することができます。別の人狼が襲撃したとき、誰が襲撃されたか知ることができます。（狩人に守られると襲撃が失敗します。）常に、人狼と裏切り者と吸血鬼のプレイヤーを把握できます。',
                 img: ImgC1,
                 color: 'red',
                 num: 0,
@@ -42,6 +44,7 @@ export default {
             {
                 id: 2,
                 name:'狩人',
+                description:'指定したプレイヤーを人狼の襲撃から守ることができます。自分を守ることや2日連続で同じプレイヤーを守ることはできません。',
                 img: ImgC2,
                 color: 'green',
                 num: 0,
@@ -50,6 +53,7 @@ export default {
             {
                 id: 3,
                 name:'占い師',
+                description:'指定したキャラクターの正体を見破ることができます。ただし、裏切り者を占うと村人だと判定してしまいます。',
                 img: ImgC3,
                 color: 'cyan',
                 num: 0,
@@ -58,6 +62,7 @@ export default {
             {
                 id: 4,
                 name:'霊媒師',
+                description:'投票で投獄されたキャラクターの正体を見破ることができます。',
                 img: ImgC4,
                 color: 'magenta',
                 num: 0,
@@ -66,6 +71,7 @@ export default {
             {
                 id: 5,
                 name:'裏切者',
+                description:'特殊な能力はありませんが、人狼が勝利すると勝利します。',
                 img: ImgC5,
                 color: 'orange',
                 num: 0,
@@ -74,6 +80,7 @@ export default {
             {
                 id: 6,
                 name:'神',
+                description:'常に、全てのキャラクターの正体を把握することができます。',
                 img: ImgC6,
                 color: 'gold',
                 num: 0,
@@ -82,6 +89,7 @@ export default {
             {
                 id: 7,
                 name:'吸血鬼',
+                description:'襲撃すると襲撃対象と役割が入れ替わります。（襲撃対象が投獄されることはありません。）人狼が勝利すると勝利します。',
                 img: ImgC7,
                 color: 'purple',
                 num: 0,
@@ -90,6 +98,7 @@ export default {
             {
                 id: 8,
                 name:'増税眼鏡',
+                description:'検討すると50％の確率で声を出してしまいます。また50％の確率で国会へ逃げ込んで人狼の襲撃から保身します。',
                 img: ImgC8,
                 color: 'darkyellow',
                 num: 0,
@@ -98,6 +107,7 @@ export default {
             {
                 id: 9,
                 name:'天使',
+                description:'投獄されたプレイヤーを救出することができます。',
                 img: ImgC9,
                 color: 'lightyellow',
                 num: 0,

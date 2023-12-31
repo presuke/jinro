@@ -50,7 +50,9 @@ class Scene
         if (count($topPlayers) == 1) {
           $timelimit = 20 - (strtotime(now()) - strtotime($votes->max('upd')));
           if ($timelimit > 0) {
-            $ret['info']['message'] = $timelimit . '秒後に投票を締め切ります。変更するならお早めに。';
+            //$ret['info']['message'] = $timelimit . '秒後に投票を締め切ります。変更するならお早めに。';
+            $ret['info']['countdown']['sec'] = $timelimit;
+            $ret['info']['countdown']['action'] = '投票';
           } else {
             try {
               DB::beginTransaction();
@@ -174,7 +176,9 @@ class Scene
       if ($playerNum == $acted->count()) {
         $timelimit = 20 - (strtotime(now()) - strtotime($acted->max('upd')));
         if ($timelimit > 0) {
-          $ret['info']['message'] = $timelimit . '秒後に夜が明けます。結果は朝知ることになるでしょう・・・';
+          //$ret['info']['message'] = $timelimit . '秒後に夜が明けます。結果は朝知ることになるでしょう・・・';
+          $ret['info']['countdown']['sec'] = $timelimit;
+          $ret['info']['countdown']['action'] = '行動';
         } else {
           try {
             $actions = DB::table('history')->where(
@@ -354,7 +358,7 @@ class Scene
       $cntTeamPeople = 0;
       foreach ($players as $player) {
         if ($player->flgDead == 0) {
-          if ($player->role == 1 || $player->role == 5) {
+          if ($player->role == 1 || $player->role == 5 || $player->role == 7) {
             $cntTeamJinro++;
           } else {
             $cntTeamPeople++;
