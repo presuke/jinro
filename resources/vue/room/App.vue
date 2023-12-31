@@ -65,7 +65,7 @@ export default {
 			this.form.player.roomid = 0;
 			this.errors = [];
 			axios
-				.get('../api/v1/room/getAll', this.param)
+				.get(this.url + '/api/v1/room/getAll', this.param)
 				.then((response) => {
 					this.isLoading = false;
 					try {
