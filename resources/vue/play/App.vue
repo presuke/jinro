@@ -1,141 +1,108 @@
 <script>
 import Header from '../Header.vue';
-import Action from './components/Action.vue'
-import Score from './components/Score.vue'
 import Footer from '../Footer.vue';
-
-import seKatakata from '../../se/katakata.mp3';
-import seCount from '../../se/count.mp3';
-import seSlide from '../../se/slide.mp3';
-import seError from '../../se/error.mp3';
-import seSuccess from '../../se/success.mp3';
-import seAction from '../../se/action.mp3';
-import seDropLifelevel from '../../se/dropLifelevel.mp3';
-import seRiseLifelevel from '../../se/riseLifelevel.mp3';
-import seBuyAsset from '../../se/buyAsset.mp3';
-import seTrade from '../../se/trade.mp3';
-import seTreat from '../../se/treate.mp3';
-import seWork from '../../se/work.mp3';
-import seSic from '../../se/sic.mp3';
-import seNoTrade from '../../se/noTrade.mp3';
-import sePeriod from '../../se/period.mp3';
-import seRiseFire from '../../se/riseFire.mp3';
-import seDropFire from '../../se/dropFire.mp3';
-import seWin from '../../se/win.mp3';
+import Const from '../../js/const.js';
 
 export default {
 	components: {
 		Header,
-		Action,
-		Score,
 		Footer,
 	},
 	data: () => ({
-		playerid: 0,
 		authtoken: '',
 		isProcessing: false,
+		isUsingPower: false,
+		timeZone: -1,
 		room: {},
 		players: [],
-		assets: [],
+		playerSelected:{},
 		me: { 
 			name: '',
+			roleid: 0,
+			role: {
+				id:0,
+				name:'',
+				img:'',
+				color:'',
+				command:[],
+			},
+		},
+		info:{
+			message: '',
 		},
 		action:{
-			event: 0,
+			message:'',
+			error:'',
 		},
-		actionResult:{
-			message: '',
-			error: '',
-		},
-		crntPlayer:{},
-		scores:{},
 		errors: [],
-		problem: -1,
-		beforeStatus: '',
+		room:{
+			roles:[],
+		},
+		players:[],
 		const:{
 			authTokenName: 'CF_AUTH_TOKEN',
-			docPath: '',
-			works:[],
-			problems:{
-				unKnown: -1,
-				noProblem: 0,
-				unAuth: 1,
-				namelessMyself: 2,
-				namelessOtherPlayer: 3,
-			}
+			roles: Const.data.roles,
+			times: Const.data.times,
+			actions: Const.data.actions,
 		},
 		reflesh:{
 			const:{
 				interval: 1000,
-				countMax: 5,
+				countMax: 10,
 			},
 			timer: '',
 			count: 0,
 			countValue: 40,
 			message: '',
 		},
-		form:{
+		dialog:{
 			login:{
-				displayDialog: false,
+				show: false,
 				pass: '',
 				error: '',
 				success: false,
 			},
-			banking:{
-				displayDialog: false,
-				amount: 0,
-				target: 0,
-				error:'',
-				message: '',
-				selection:[],
+			result:{
+				vote:{
+					show:false,
+				},
+				action:{
+					show:false,
+					attackedPlayers:[],
+					freedomPlayers:[],
+					message : [],
+					confirmed: false,
+				},
+			},
+			confirm:{
+				show:false,
+				message:'',
+				ret: false,
+			},
+			win:{
+				show:false,
+			},
+			predict:{
+				show:false,
+			},
+			expose:{
+				show:false,
+			},
+			roomInfo:{
+				show: false,
+			},
+			myCard:{
+				show: false,
 			},
 			copyright:{
-				displayDialog: false,
+				show: false,
 			},
 		},
-		se: {
-			Katakata: null,
-			Count:null,
-			Slide: null,
-			Error: null,
-			Success: null,
-			Action: null,
-			DropLifelevel: null,
-			RiseLifelevel: null,
-			BuyAsset: null,
-			Trade: null,
-			Treat: null,
-			Work: null,
-			Sic: null,
-			NoTrade: null,
-			Period: null,
-			RiseFire: null,
-			DropFire: null,
-			Win: null,
-		},
+		se: Const.data.se,
 		ret:{}
 	}),
 	created() {
 		const segments = window.location.pathname.split('/');
-		
-		this.se.Katakata = new Audio(seKatakata);
-		this.se.Count = new Audio(seCount);
-		this.se.Slide = new Audio(seSlide);
-		this.se.Error = new Audio(seError);
-		this.se.Success = new Audio(seSuccess);
-		this.se.Action = new Audio(seAction);
-		this.se.DropLifelevel = new Audio(seDropLifelevel);
-		this.se.RiseLifelevel = new Audio(seRiseLifelevel);
-		this.se.BuyAsset = new Audio(seBuyAsset);
-		this.se.Trade = new Audio(seTrade);
-		this.se.Treat = new Audio(seTreat);
-		this.se.Work = new Audio(seWork);
-		this.se.Sic = new Audio(seSic);
-		this.se.NoTrade = new Audio(seNoTrade);
-		this.se.Period = new Audio(sePeriod);
-		this.se.RiseFire = new Audio(seRiseFire);
-		this.se.DropFire = new Audio(seDropFire);
-		this.se.Win = new Audio(seWin);
 
 		this.const.docPath = window.location.origin;
 		for(let i=1; i<segments.length-2; i++){
@@ -143,24 +110,61 @@ export default {
 		}
 
 		this.playerid = segments[segments.length - 1];
-		this.problem = this.const.problems.unAuth;
 		this.authtoken = localStorage.getItem(this.const.authTokenName);
 		if(this.authtoken == null)
 			this.authtoken = '';
 
-		//銀行の借入額
-		this.form.banking.selection = [];
-		for(let i=500; i<=10000; i+=500){
-			this.form.banking.selection.push(i);
-		}
-
-		//se
-		this.se.count = new Audio(seKatakata);
+		//役割ごとのコマンドを設定
+		this.const.roles.forEach((role) => {
+			switch(role.id){
+				case 0:{
+					role.command = [{name:'眠る', action:this.const.actions.sleep,}]
+					break;
+				}
+				case 1:{
+					role.command = [{name:'襲撃', action:this.const.actions.attack,}]
+					break;
+				}
+				case 2:{
+					role.command = [{name:'守る', action:this.const.actions.save,}]
+					break;
+				}
+				case 3:{
+					role.command = [{name:'占う', action:this.const.actions.predict,}]
+					break;
+				}
+				case 4:{
+					role.command = [{name:'霊媒', action:this.const.actions.expose,}]
+					break;
+				}
+				case 5:{
+					role.command = [{name:'眠る', action:this.const.actions.sleep,}]
+					break;
+				}
+				case 6:{
+					role.command = [{name:'眠る', action:this.const.actions.sleep,}]
+					break;
+				}
+				case 7:{
+					role.command = [{name:'襲撃', action:this.const.actions.change,},{name:'眠る', action:this.const.actions.sleep,}]
+					break;
+				}
+				case 8:{
+					role.command = [{name:'検討', action:this.const.actions.consider,},{name:'眠る', action:this.const.actions.sleep,}]
+					break;
+				}
+				case 9:{
+					role.command = [{name:'救出', action:this.const.actions.freedom,},{name:'眠る', action:this.const.actions.sleep,}]
+					break;
+				}
+			}
+		});
 
 		this.refleshStatus();
 	},
 	methods: {
 		startRefleshTimer(){
+			clearInterval(this.reflesh.timer);
 			this.reflesh.count = 0;
 			this.reflesh.timer = null;
 			this.reflesh.timer = setInterval(()=>{
@@ -177,7 +181,7 @@ export default {
 			//部屋の状況を取得
 			this.authtoken = localStorage.getItem(this.const.authTokenName);
 			axios
-			.get(this.const.docPath + '/api/v1/play/getRoomStatus', {
+			.get('../api/v1/play/getRoomStatus', {
 				params: {
 					playerid: this.playerid,
 					authtoken: this.authtoken,
@@ -186,70 +190,195 @@ export default {
 			.then((response) => {
 				try {
 					if(response.data.code == 0){
-						let isGameSet = false;
-						this.problem = this.const.problems.noProblem;
-
+						this.startRefleshTimer();
 						this.room = response.data.room;
-						//プレイ画面更新
-						this.players = [];
-						for(let i=0; i< response.data.players.length; i++){
-							let player = response.data.players[i];
-							player.work = response.data.works[player.workid];
+						for(let i=0; i<this.room.roles.length; i++){
+							this.const.roles.forEach((role) => {
+								if(role.id == this.room.roles[i].id){
+									this.room.roles[i].img = role.img;
+									this.room.roles[i].color = role.color;
+								}
+							});
+						}
+						this.players = response.data.players;
+						this.me = response.data.me;
+						this.timeZone = response.data.timeZone;
+						this.info = response.data.info;
 
-							player.stock = 0;
-							player.estate = 0;
-							player.loan = 0;
-							for(let j=0; j< response.data.assets.length; j++){
-								let asset = response.data.assets[j];
-								if(asset.playerid == player.id && asset.has > 0){
-									if(asset.type == 'stock'){
-										player.stock += asset.buy * asset.has;
-									}else if(asset.type == 'estate'){
-										player.estate += asset.buy * asset.has;
-									}else if(asset.type == 'loan'){
-										player.loan += asset.buy;
+						//役割
+						this.me.role = this.getRole(this.me.roleid);
+						//他の人の役割（分かっている人のための）
+						this.players.forEach((player) => {
+							player.role = this.getRole(player.roleid);
+						});
+
+						//時間帯による処理
+						switch(this.info.time){
+							//投票中
+							case  0:{
+								const votes = response.data.votes;
+								for(let idx = 0; idx < this.players.length; idx++){
+									let player = this.players[idx];
+									votes.forEach((vote) => {
+										if(vote.playerid == player.id){
+											player.done = 1;
+										}
+									});
+									this.players[idx] = player;
+								}
+								break;
+							}
+							//投票結果
+							case 1:{
+								const confirms = response.data.confirms;
+								for(let idx = 0; idx < this.players.length; idx++){
+									let player = this.players[idx];
+									confirms.forEach((confirm) => {
+										if(confirm.playerid == player.id){
+											player.done = 1;
+										}
+									});
+									this.players[idx] = player;
+								}
+								if(this.info.result.vote != undefined) {
+									this.players.forEach((player) => {
+										if(player.id == this.info.result.vote.targetid){
+											this.dialog.result.vote.player = player;
+										}
+									});
+									if(!this.info.result.vote.confirmed){
+										if(!this.dialog.result.vote.show){
+											this.dialog.result.vote.show = true;
+											this.se.Jail.play();
+										}
 									}
 								}
+								break;
 							}
-
-							if(player.flgFire == 2){
-								isGameSet = true;
+							//役割ごとのアクション
+							case 2:{
+								const acted = response.data.acted;
+								for(let idx = 0; idx < this.players.length; idx++){
+									let player = this.players[idx];
+									acted.forEach((act) => {
+										if(act.playerid == player.id){
+											player.done = 1;
+										}
+									});
+									this.players[idx] = player;
+								}
+								const message = 'あなたは' + this.me.role.name + 'です。さぁ、あなたがやるべきことをやってください。';
+								if(this.info == undefined){
+									this.info.message = message;
+								}else if(this.info.message == undefined){
+									this.info.message = message;
+								}
+								break;
 							}
-							if(player.id == this.playerid){
-								this.me = player;
-							}else{
-								this.players.push(player);
+							//襲撃結果
+							case 3:{
+								if(this.info.result != undefined) {
+									const action = this.info.result.action;
+									const confirms = this.info.result.confirmed;
+									for(let idx = 0; idx < this.players.length; idx++){
+										let player = this.players[idx];
+										confirms.forEach((confirm) => {
+											if(confirm.playerid == player.id){
+												player.done = 1;
+											}
+										});
+										this.players[idx] = player;
+									}
+									this.dialog.result.action.json = this.info.result;
+									this.dialog.result.action.confirmed = this.info.result.confirmed;
+									this.dialog.result.action.attackedPlayers = [];
+									this.dialog.result.action.freedomPlayers = [];
+									this.dialog.result.action.message = [];
+									this.players.forEach((player) => {
+										action.attacked.forEach((attackedPlayerid) => {
+											if(player.id == attackedPlayerid){
+												this.dialog.result.action.attackedPlayers.push(player);
+											}
+										});
+										action.freedom.forEach((freedomPlayerid) => {
+											if(player.id == freedomPlayerid){
+												this.dialog.result.action.freedomPlayers.push(player);
+											}
+										});
+									});
+									let flgAttacked = this.dialog.result.action.attackedPlayers.length > 0;
+									let flgFreedom = this.dialog.result.action.freedomPlayers.length > 0;
+									let flgSaved = false;
+									let flgChanged = false;
+									if(action.cntSave != undefined){
+										if(action.cntSave > 0){
+											this.dialog.result.action.message.push(action.cntSave + '人が狩人に守られました。');
+											flgSaved = true;
+										}
+									}
+									if(action.cntConsider != undefined){
+										if(action.cntConsider > 0){
+											this.dialog.result.action.message.push(action.cntConsider + '人が検討して難を逃れました。');
+											flgSaved = true;
+										}
+									}
+									if(action.cntChange != undefined){
+										if(action.cntChange > 0){
+											this.dialog.result.action.message.push(action.cntChange + '人が吸血鬼に襲われました。');
+											flgChanged = true;
+										}
+									}
+									if(!this.info.result.myconfirmed){
+										if(!this.dialog.result.action.show){
+											this.dialog.result.action.show = true;
+											//se
+											if(flgAttacked && flgFreedom){
+												this.se.JailAndFreedom.play();
+											}else if(flgAttacked && !flgFreedom){
+												this.se.Jail.play();
+											}else if(!flgAttacked && flgFreedom){
+												this.se.Freedom.play();
+											}else if(!flgAttacked && flgSaved){
+												this.se.Safe.play();
+											}
+										}
+									}
+								}
+								break;
+							}
+							//勝敗
+							case 4:{
+								let lstJinro = [];
+								let lstPeaple = [];
+								this.players.forEach((player) => {
+									if(player.flgDead == 0){
+										if(player.roleid == 1 || player.roleid ==5){
+											lstJinro.push(player);
+										}else if(player.role != undefined){
+											lstPeaple.push(player);
+										}
+									}
+								});
+								if(lstJinro.length == 0){
+									this.dialog.win.team = '村人';
+									this.dialog.win.players = lstPeaple;
+								}else if(lstJinro.length >= lstPeaple.length){
+									this.dialog.win.team = '人狼';
+									this.dialog.win.players = lstJinro;
+								}else{
+									this.info.message = 'システムエラー';
+									return;
+								}
+								if(!this.dialog.win.show){
+									clearInterval(this.reflesh.timer);
+									this.reflesh.count = 0;
+									this.reflesh.timer = null;
+									this.se.Win.play();
+									this.dialog.win.show = true;
+								}
+								break;
 							}
 						}
-						this.players.unshift(this.me);
-
-						this.assets = response.data.assets;
-						this.crntPlayer = response.data.crntPlayer;
-						this.action = response.data.action;
-
-						//カードめくる時になったらメッセージ削除
-						if(this.action.event == 0){
-							this.actionResult.message = '';
-							this.actionResult.error = '';
-						}
-
-						//音を鳴らす
-						this.playSoundErrect();
-
-						//スコアを更新する
-						this.updateScore();
-
-						//自分がプレイヤーで資産購入・売却であれば、自動ページ更新処理を起動しない
-						if((this.action.event == 2 || this.action.event == 3 || this.action.event == 4) && this.crntPlayer.id == this.me.id){
-							this.reflesh.count = 0;
-							console(this.action);
-						}else if(isGameSet){
-							this.reflesh.count = 0;
-							console(this.action);
-						}else{
-							this.startRefleshTimer();
-						}
-
 					}else if(response.data.code == 7){
 						//名無しエラー
 						this.problem = this.const.problems.namelessOtherPlayer;
@@ -257,7 +386,7 @@ export default {
 						//名無しエラー
 						this.problem = this.const.problems.namelessMyself;
 					}else if(response.data.code == 1 || response.data.code == 9){
-						this.form.login.displayDialog = true;
+						this.dialog.login.show = true;
 					}else if(response.data.room  != undefined){
 						this.rooms = response.data.room;
 					}else if(response.data.errors.length > 0){
@@ -275,129 +404,27 @@ export default {
 				setTimeout(() =>this.refleshStatus(), 500);
 			});
 		},
-		playSoundErrect(){
-			const key = this.crntPlayer.id + ':' + this.action.action;
-			if(this.beforeStatus != key){
-				this.beforeStatus = key;
-				switch(this.action.action){
-					case 'work':{
-						this.se.Work.play();
-						break;
-					}
-					case 'sic':{
-						this.se.Sic.play();
-						break;
-					}
-					case 'treat':{
-						this.se.Treat.play();
-						break;
-					}
-					case 'dropLifeLevel':{
-						this.se.DropLifelevel.play();
-						break;
-					}
-					case 'riseLifeLevel':{
-						this.se.RiseLifelevel.play();
-						break;
-					}
-					case 'trade':{
-						this.se.Trade.play();
-						break;
-					}
-					case 'buyEstate':{
-						this.se.BuyAsset.play();
-						break;
-					}
-					case 'buyStock':{
-						this.se.BuyAsset.play();
-						break;
-					}
-					case 'lostEstate':{
-						this.se.NoTrade.play();
-						break;
-					}
-					case 'lostStock':{
-						this.se.NoTrade.play();
-						break;
-					}
-					case 'riseZone':{
-						this.se.RiseFire.play();
-						break;
-					}
-					case 'dropZone':{
-						this.se.DropFire.play();
-						break;
-					}
-					case 'win':{
-						this.se.Win.play();
-						break;
-					}
-					default:{
-						if(this.crntPlayer.turn % this.room.period == 0){
-							this.se.Period.play();
-						}else{
-							this.se.Slide.play();
-						}
-						break;
-					}
-				}
+		act(action){
+			const retCheck = this.checkAction(action);
+			if(!retCheck){
+				return ;
 			}
-		},
-		updateScore(){
-			try{
-				const keyParameters = ['money', 'stock', 'estate', 'loan', 'stress'];
-				//初呼び出しの場合は初期化
-				if(JSON.stringify(this.scores) == '{}'){
-					this.players.forEach(player => {
-						let key = player.id + '';
-						this.scores[key] = {};
-						keyParameters.forEach(keyParameter =>{
-							this.scores[key][keyParameter] = 0;
-						});
-					});
-				}
-
-				this.players.forEach(player => {
-					keyParameters.forEach(keyParameter =>{
-						if(player[keyParameter] != this.scores[player.id][keyParameter]){
-							let timerAnimation = setInterval(() =>{
-								this.scores[player.id][keyParameter] += Math.ceil((player[keyParameter] - this.scores[player.id][keyParameter]) / 5);
-								this.se.Katakata.play();
-								if(Math.abs(this.scores[player.id][keyParameter] - player[keyParameter]) < 10){
-									this.scores[player.id][keyParameter] = player[keyParameter];
-									clearInterval(timerAnimation);
-									this.se.Katakata.pause();
-							        this.se.Katakata.currentTime = 0;
-								}
-							},100);
-						}
-					});
-				});
-			}catch(err)
-			{
-				console.log(err);
-			}
-		},
-		act(actionMode){
-			if(this.crntPlayer.id != this.me.id){
-				this.actionResult.error = 'あなたのターンではありません。';
-				this.se.Error.play();
+			if(this.action.error != ''){
+				this.action.message = '';
 				return;
 			}
-			this.se.Action.play();
+			this.action.error = '';
+			this.action.message = '';
 			this.isProcessing = true;
 			this.reflesh.count = 0;
-			this.actionResult.error = '';
-			this.actionResult.message = '';
 			this.ret = '';
 			this.authtoken = localStorage.getItem(this.const.authTokenName);
 			let params = {};
-			params.playerid = this.playerid;
+			params.myid = this.me.id;
+			params.targetid = this.playerSelected.id;
+			params.roles = this.const.roles;
+			params.action = action;
 			params.authtoken = this.authtoken;
-			params.actionMode = actionMode;
-			if(actionMode != 'drowCard'){
-				params.assets = this.assets;
-			}
 
 			axios
 			.post(this.const.docPath + '/api/v1/play/action', {
@@ -408,12 +435,42 @@ export default {
 					this.isProcessing = false;
 					//this.action.event = actionEventBackup;
 					this.reflesh.count = this.reflesh.const.countMax - 1;
+
 					if(response.data.error != undefined) {
-						this.actionResult.error = response.data.error;
+						this.action.error = response.data.error;
 						this.refleshStatus();
 					}else if(response.data.message != undefined){
-						this.actionResult.message = response.data.message;
+						this.action.message = response.data.message;
 						this.refleshStatus();
+					}
+
+					if(response.data.result != undefined){
+						const result = response.data.result;
+						if(result.predict != undefined){
+							const target = result.predict.target;
+							//役割
+							this.const.roles.forEach((role) => {
+								if(target.role == role.id){
+									target.role = role;
+								}
+							});
+							this.dialog.predict.target = target;
+							this.dialog.predict.show = true;
+						}else if(result.expose != undefined){
+							const target = result.expose.target;
+							//役割
+							this.const.roles.forEach((role) => {
+								if(target.role == role.id){
+									target.role = role;
+								}
+							});
+							this.dialog.expose.target = target;
+							this.dialog.expose.show = true;
+						}else if(result.consider != undefined){
+							if(result.consider == 'voice'){
+								this.se.Consider.play();
+							}
+						}
 					}
 				} catch (e) {
 					this.errors = e;
@@ -424,109 +481,126 @@ export default {
 				this.ret.push(err);
 			});
 		},
-		confirm(){
-			this.actionResult.error = '';
-			this.se.Action.play();
-
-			axios
-			.post(this.const.docPath + '/api/v1/play/action', {
-				params: {
-					playerid: this.playerid,
-					crntPlayer: this.crntPlayer,
-					authtoken: this.authtoken,
-					actionMode: 'confirm',
-				}
-			})
-			.then((response) => {
-				try {
-					if(response.data.error != undefined) {
-						this.actionResult.error = response.data.error;
-					}else if(response.data.message != undefined){
-						this.actionResult.message = response.data.message;
-						this.reflesh.count * 100 / this.reflesh.const.countMax - 1;
+		checkAction(action) {
+			this.action.error = '';
+			if(this.me.flgDead == 1 && action != 'confirmActionResult'){
+				this.action.error = 'あなたは投獄されています。他のプレイヤーの行動を静観しましょう。';
+				return false;
+			}
+			switch(action){
+				case this.const.actions.vote:{
+					if(this.playerSelected.id == undefined){
+						this.action.error = '投票する人を指定してください。';
+					}else if(this.playerSelected.flgDead == 1){
+						this.action.error = '投獄されていない人を指定してください。';
 					}
-				} catch (e) {
-					this.errors = e;
+					break;
 				}
-			})
-			.catch((err) => {
-				console.log(err);
+				case this.const.actions.sleep:{
+					//人前行動キャンセル確認
+					if(this.action.message.indexOf('救出') != -1){
+						if(!confirm('救出をキャンセルして就寝しますか？')){
+							return false;
+						}
+					}else if(this.action.message.indexOf('襲撃') != -1){
+						if(!confirm('襲撃をキャンセルして就寝しますか？')){
+							return false;
+						}
+					}else if(this.action.message.indexOf('検討') != -1){
+						if(!confirm('確認', '検討をキャンセルして就寝しますか？')){
+							return false;
+						}
+					}
+					if(this.playerSelected.id == undefined){
+						this.action.error = '誰かを指定してください。その人の無事を祈りながら眠りましょう。';
+					}
+					break;
+				}
+				case this.const.actions.consider:{
+					if(this.playerSelected.id == undefined){
+						this.action.error = '誰かを指定してください。その人について国会で検討しましょう。';
+					}
+					break;
+				}
+				case this.const.actions.attack:{
+					if(this.playerSelected.id == undefined){
+						this.action.error = '襲撃する人を指定してください。';
+					}else if(this.playerSelected.role.id == 1){
+						this.action.error = '襲撃対象に人狼を指定することはできません。';
+					}else if(this.playerSelected.flgDead == 1){
+						this.action.error = '投獄されていない人を指定してください。';
+					}
+					break;
+				}
+				case this.const.actions.save:{
+					if(this.playerSelected.id == undefined){
+						this.action.error = '守る対象を指定してください。';
+					}else if(this.playerSelected.flgDead == 1){
+						this.action.error = '投獄されていない人を指定してください。';
+					}
+					break;
+				}
+				case this.const.actions.expose:{
+					if(this.playerSelected.id == undefined){
+						this.action.error = '霊媒する対象を指定してください。';
+					}else if(this.playerSelected.flgDead == 0){
+						this.action.error = '投獄されている人を指定してください。';
+					}
+					break;
+				}
+				case this.const.actions.predict:{
+					if(this.playerSelected.id == undefined){
+						this.action.error = '占う対象を指定してください。';
+					}else if(this.playerSelected.flgDead == 1){
+						this.action.error = '投獄されていない人を指定してください。';
+					}
+					break;
+				}
+				case this.const.actions.freedom:{
+					if(this.playerSelected.id == undefined){
+						this.action.error = '救う対象を指定してください。';
+					}else if(this.playerSelected.flgDead == 0){
+						this.action.error = '投獄されている人を指定してください。';
+					}
+					break;
+				}
+				default:{
+					break;
+				}
+			}
+			return true;
+		},
+		showConfirm(message){
+			this.dialog.confirm.message = message;
+			this.dialog.confirm.show = true;
+			this.dialog.confirm.ret = undefined;
+			return new Promise((resolve) => {
+				if(this.dialog.confirm.ret != undefined){
+					alert('a');
+				}
 			});
 		},
-		doBanking(target){
-			if(this.crntPlayer.id != this.me.id){
-				this.actionResult.error = 'あなたのターンではありません。';
-				this.se.Error.play();
-				return;
-			}
-			this.se.Action.play();
-			if(target > 0){
-				this.form.banking.target = target;
-				this.form.banking.amount = 0;
-				this.form.banking.error = '';
-				this.form.banking.message = '';
-				this.form.banking.displayDialog = true;
-			}else if(target == 0){
-				this.form.banking.error = '';
-				this.form.banking.message = '';
-				if(this.form.banking.amount == 0){
-					this.form.banking.error = '借入額を決めてください。';
-					this.se.Error.play();
-				}else if(this.form.banking.target > this.crntPlayer.money + this.form.banking.amount){
-					this.form.banking.error = this.form.banking.amount.toLocaleString() + '借入れても物件価格に到達しません。';
-					this.se.Error.play();
-				}else{
-					axios
-					.post(this.const.docPath + '/api/v1/play/action', {
-						params: {
-							playerid: this.playerid,
-							authtoken: this.authtoken,
-							actionMode: 'banking',
-							amount: this.form.banking.amount,
-						}
-					})
-					.then((response) => {
-						try {
-							if(response.data.error != undefined){
-								this.form.banking.error = response.data.error;
-								this.se.Error.play();
-							}else{
-								this.form.banking.message = response.data.message;
-								this.refleshStatus();
-								this.se.Success.play();
-							}
-						} catch (e) {
-							this.errors = e;
-						}
-					})
-					.catch((err) => {
-						console.log(err);
-					});
-				}
-			}
-		},
 		login(){
-			this.form.login.error = '';
-			this.se.Action.play();
+			this.dialog.login.error = '';
 
 			axios
 			.post(this.const.docPath + '/api/v1/play/login', {
 				playerid: this.playerid,
-				pass: this.form.login.pass,
+				pass: this.dialog.login.pass,
 			})
 			.then((response) => {
 				try {
 					if(response.data.code == 0 && response.data.token != ''){
 						this.authtoken = response.data.token;
 						localStorage.setItem(this.const.authTokenName, response.data.token);
-						this.form.login.success = true;
-						this.form.login.displayDialog = false;
+						this.dialog.login.success = true;
+						this.dialog.login.show = false;
 						this.refleshStatus();
 						this.se.Success.play();
 					}
 					else if(response.data.error != undefined){
-						this.form.login.displayDialog = true;
-						this.form.login.error = response.data.error;
+						this.dialog.login.show = true;
+						this.dialog.login.error = response.data.error;
 						this.se.Error.play();
 					}else{
 						this.errors.push('特定できないエラー');
@@ -545,25 +619,25 @@ export default {
 			this.refleshStatus();
 			this.se.Action.play();
 		},
-		changeStockHas(stock, num){
-			this.se.Count.play();
-
-			if(num > 0 || stock.has != 0){
-				stock.has += num;
-			}
-			let assetTotal = 0;
-			this.assets.forEach((asset)=>{
-				if(asset.playerid == this.crntPlayer.id &&
-				   asset.turn == this.crntPlayer.turn && 
-				   asset.type=='stock'){
-					assetTotal += asset.buy * asset.has;
+		getRole(roleid){
+			let ret = undefined;
+			this.const.roles.forEach((role) => {
+				if(roleid == role.id){
+					switch(role.id){
+						case 0:
+						case 1:{
+							role.ShortName = role.name.substring(1,2);
+							break;
+						}
+						default:{
+							role.ShortName = role.name.substring(0,1);
+							break;
+						}
+					}
+					ret = role;
 				}
-			})
-			if(assetTotal > this.me.money){
-				this.actionResult.error = '所持金が足りません。合計金額：' + assetTotal.toLocaleString();
-			}else{
-				this.actionResult.error = '';
-			}
+			});
+			return ret;
 		},
 		checkString: function (inputdata) {
 			var regExp = /^[a-zA-Z0-9_]*$/;
@@ -580,188 +654,639 @@ export default {
 };
 </script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Rajdhani:wght@500&family=Shrikhand&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Reggae+One&display=swap');
 </style>
 <style lang="scss" scoped>
 @import '../../scss/app.scss';
 </style>
-
+<style type="scss" scoped>
+@import '../../scss/play.scss';
+</style>
 <template>
-	<header>
-		<Header></Header>
-	</header>
-	<div class="area">
-		<div id="action">
-			<Action></Action>
+	<div id="app" :style="{ backgroundImage: `url('../image/bg${this.room.time}.jpg')` }">
+		<header>
+			<Header></Header>
+		</header>
+
+		<v-progress-linear 
+		v-model="this.reflesh.countValue"
+		color="purple">
+		</v-progress-linear>
+		<div>
+			{{ this.room.day }}日目 {{ this.const.times[this.room.time] }}
 		</div>
-		<div id="score">
-			<Score></Score>
-		</div>
-		<ul class="circles" style="z-index: 0;">
-				<li>&yen;</li>
-				<li>$</li>
-				<li>€</li>
-				<li>&yen;</li>
-				<li>$</li>
-				<li>€</li>
-				<li>&yen;</li>
-				<li>$</li>
-				<li>€</li>
-				<li>&yen;</li>
-		</ul>
-		{{ this.errors }}
-		<ul class="error">
-			<li v-for="error in this.errors">{{ error }}</li>
-		</ul>
-	</div>
-
-	<!-- ログインダイアログ-->
-	<v-dialog
-	v-model="this.form.login.displayDialog"
-	transition="dialog-top-transition"
-	max-width="400"
-	class="dialog"
-	>
-		<v-card>
-			<v-card-title
-			color="primary"
-			dark
+		<div id="players">
+			<div
+			v-for="player in this.players"
+			style="float:left;"
 			>
-			<span class="text-h5">認証</span>
-			</v-card-title>
-			<v-card-text>
-				<v-container>
-					<v-row>
-						<v-col cols="12">
-							<v-text-field
-							label="Password*"
-							type="password"
-							v-model="this.form.login.pass"
-							required
-							></v-text-field>
-						</v-col>
-					</v-row>
-					<v-row>
-						<div v-for="n in 10" style="float:left; margin:5px;">
-							<v-btn @click="this.form.login.pass += (n%10) + ''">{{ n%10 }}</v-btn>
-						</div>
-						<div style="float:left; margin:5px;">
-							<v-btn @click="this.form.login.pass = ''">Clear</v-btn>
-						</div>
-					</v-row>
-				</v-container>
-				<div class="error">
-					{{this.form.login.error}}
-				</div>
-			</v-card-text>
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn
-				color="blue-darken-1"
-				variant="text"
-				@click="login()"
+				<div
+				v-if="player.sex == ''"
+				class="player"
 				>
-					ログイン
-				</v-btn>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
-
-	<!--銀行借り入れダイアログ-->
-	<v-dialog 
-	v-model="this.form.banking.displayDialog"
-	transition="dialog-top-transition"
-	max-width="400"
-	class="dialog"
-	>
-		<v-card width="320" height="400">
-			<v-card-title
-			color="primary"
-			dark
-			>
-				<span class="text-h5">借入</span>
-			</v-card-title>
-			<v-card-text>
-				<div>{{ this.form.banking.target.toLocaleString() }}の物件を検討中。</div>
-				<div>現在の金利は{{ room.interest }}％です。</div>
-				<v-container>
-					<v-row>
-						<v-col cols="12">
-							<v-select
-								label="借入額"
-								v-model="form.banking.amount"
-								:items="form.banking.selection"
-							></v-select>
-						</v-col>
-					</v-row>
-				</v-container>
-				<div class="error">
-					{{ form.banking.error }}
+					<img :src="'../image/avatar/random.png'"
+					style="width:50px; height:50px;border-radius:50%;"
+					/>
+					<div style="font-size:smaller;">
+						?
+					</div>
 				</div>
-				<div class="message">
-					{{ form.banking.message }}
-				</div>
-				<div style="margin-top:5px; border-radius:5px; background-color:lightyellow;color:red; font-size:smaller;">
-					<div>*借入限度は給料の10倍です。</div>
-					<div>*元金均等法10分割で、決算時に返済します。</div>
-				</div>
-			</v-card-text>
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn
-				color="blue-darken-1"
-				variant="text"
-				@click="this.form.banking.displayDialog = false"
+				<div
+				v-else
+				class="player"
+				v-bind:class="[this.playerSelected.id == player.id ? 'selectedOn' : 'selectedOff']"
+				@click="if(this.me.id == player.id) { this.isUsingPower = !this.isUsingPower; this.playerSelected ={}; }else{ this.playerSelected = player; }"
 				>
-					やめる
-				</v-btn>
-				<v-btn
-				color="blue-darken-1"
-				variant="text"
-				@click="doBanking(0)"
-				>
-					借入れる
-				</v-btn>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
-
-	<!--銀行借り入れダイアログ-->
-	<v-dialog 
-	v-model="this.form.copyright.displayDialog"
-	transition="dialog-top-transition"
-	max-width="400"
-	>
-		<v-card width="320" height="400">
-			<v-card-text style="overflow-y: auto;">
-				<div>
+					<div 
+					class="votenum"
+					:class="[info.time == 0 ? 'show' : 'hide']"
+					:style="{ display: [ player.flgDead == 1 ? `none`: `block` ]}"
+					>
+						{{ player.votenum }}
+					</div>
+					<div 
+					v-if="isUsingPower"
+					class="roleShortName">
+						{{ player.role.ShortName }}
+					</div>
+					<div 
+					class="attacked"
+					:class="[player.attacked == 9 ? 'show' : 'hide', ]">
+						<img 
+						:src="'../image/attacked.png'" style="width:30px; height:30px;" />
+					</div>
 					<img 
-                            src="../../image/github-mark.svg" 
-                            class="icon" 
-                            style="filter: drop-shadow(2px 2px 2px #66c);"
-                            />https://github.com/renoneve/cashflow
+					class="icon"
+					:src="'../image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+					:class="[player.flgDead == 1 ? 'dead' : '', player.done == 1 ? 'done' : '']"
+					:style="{ boxShadow: [ isUsingPower ? `0px 5px 10px ${player.role.color}`: `` ]}"
+					/>
+					<div 
+					style="font-size:smaller;"
+					:style="{ color: [ this.me.id == player.id ? `yellow`: `white` ]}"
+					>
+						{{ player.name }}
+					</div>
+				</div>
+			</div>
+			<br style="clear:both;" />
+		</div>
+		<br style="clear:left;" />
+		<div id="information">
+			{{ this.info.message }}
+		</div>
+
+		<!-- ログインダイアログ-->
+		<v-dialog
+		v-model="this.dialog.login.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card>
+				<v-card-title
+				color="primary"
+				dark
+				>
+				<span class="text-h5">認証</span>
+				</v-card-title>
+				<v-card-text>
+					<v-container>
+						<v-row>
+							<v-col cols="12">
+								<v-text-field
+								label="Password*"
+								type="password"
+								v-model="this.dialog.login.pass"
+								required
+								></v-text-field>
+							</v-col>
+						</v-row>
+						<v-row>
+							<div v-for="n in 10" style="float:left; margin:5px;">
+								<v-btn @click="this.dialog.login.pass += (n%10) + ''">{{ n%10 }}</v-btn>
+							</div>
+							<div style="float:left; margin:5px;">
+								<v-btn @click="this.dialog.login.pass = ''">Clear</v-btn>
+							</div>
+						</v-row>
+					</v-container>
+					<div class="error">
+						{{this.dialog.login.error}}
+					</div>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="location.href='../room'"
+					>
+						戻る
+					</v-btn>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="login()"
+					>
+						ログイン
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!--部屋情報-->
+		<v-dialog 
+		v-model="this.dialog.roomInfo.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card width="320" height="400">
+				<v-card-title>
+					{{ this.room.name }}
+				</v-card-title>
+				<v-card-text style="overflow-y: auto;">
+					<div id="roles">
+						<div
+						v-for="role in this.room.roles"
+						style="float:left;"
+						>
+							<div 
+							class="role"
+							:style="{ backgroundImage: `url('${role.img}')` }"
+							>
+								<div class="num">
+									{{ role.num }}
+								</div>
+								<div class="name" v-bind:style="{ boxShadow: `0px 5px 10px ${role.color}` }">
+									{{ role.name }}
+								</div>
+							</div>
 						</div>
-			</v-card-text>
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn
-				color="blue-darken-1"
-				variant="text"
-				@click="this.logout();"
-				>
-					ログアウト
-				</v-btn>
-				<v-btn
-				color="blue-darken-1"
-				variant="text"
-				@click="this.form.copyright.displayDialog = false;"
-				>
-					閉じる
-				</v-btn>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
-	<footer @click="this.form.copyright.displayDialog = true;">
-		<Footer></Footer>
-	</footer>
+						<br style="clear:both;" />
+					</div>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.roomInfo.show = false;"
+					>
+						閉じる
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!--自カード情報-->
+		<v-dialog 
+		v-model="this.dialog.myCard.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card width="320" height="400">
+				<v-card-title>
+					あなたのカード
+				</v-card-title>
+				<v-card-text style="overflow-y: auto;">
+					<div 
+					class="role"
+					style="width:260px; height:260px;"
+					:style="{ backgroundImage: `url('${this.me.role.img}')` }"
+					>
+						<div style="width:100%; text-align:cener; background-color:rgba(0, 0, 0, 0.5);">
+							{{ this.me.role.name }}
+						</div>
+					</div>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.myCard.show = false;"
+					>
+						閉じる
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!-- 投票結果-->
+		<v-dialog
+		v-model="this.dialog.result.vote.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		>
+			<v-card width="320" height="400">
+				<v-card-title>
+					投票結果
+				</v-card-title>
+				<v-card-text class="jail">
+					{{ this.dialog.result.vote.player.name }}さんが投獄されました。
+					<img :src="'../image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
+					class="icon"
+					/>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.act(this.const.actions.confirmVoteResult); this.dialog.result.vote.show = false;"
+					>
+						確認
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!-- 襲撃結果-->
+		<v-dialog
+		v-model="this.dialog.result.action.show"
+		transition="dialog-top-transition"
+		max-width="500"
+		>
+			<v-card maxWidth="500" height="500">
+				<v-card-title>
+					結果
+				</v-card-title>
+				<v-card-text>
+					<div v-if="this.dialog.result.action.attackedPlayers.length > 0"
+					class="confine">
+						以下の人が、人狼に拉致されて、投獄されました。
+						<div style="clear:left;">
+							<div 
+							style="float:left;text-align:center;"
+							v-for="player in this.dialog.result.action.attackedPlayers"
+							>
+								<img :src="'../image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+								class="icon"
+								/>
+								<div>
+									{{ player.name }}
+								</div>
+							</div>
+						</div>
+					</div>
+					<div v-if="this.dialog.result.action.freedomPlayers.length > 0"
+					class="freedom">
+						以下の人が、天使により救われました。
+						<div style="clear:left;">
+							<div 
+							style="float:left;text-align:center;"
+							v-for="player in this.dialog.result.action.freedomPlayers"
+							>
+								<img :src="'../image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+								class="icon"
+								/>
+								<div>
+									{{ player.name }}
+								</div>
+							</div>
+						</div>
+					</div>
+					<ul 
+					style="margin-left:10px;list-style-type:none;"
+					v-for="message in this.dialog.result.action.message"
+					>
+						<li>
+							{{ message }}
+						</li>
+					</ul>
+				<!--
+				-->
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.act(this.const.actions.confirmActionResult); this.dialog.result.action.show = false;"
+					>
+						確認
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!-- 占い結果-->
+		<v-dialog
+		v-model="this.dialog.predict.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card maxWidth="400" height="400">
+				<v-card-title>
+					占い結果
+				</v-card-title>
+				<v-card-text 
+				style="background-size: contain; background-position: center; text-shadow: 0 0 5px black;"
+				:style="{ backgroundImage: `url('${this.dialog.predict.target.role.img}')` }">
+					{{ this.dialog.predict.target.name }}さんは、{{ this.dialog.predict.target.role.name }}です。
+					<img 
+					style="width:100px; height:100px; border-radius: 50%;"
+					:src="'../image/avatar/' + this.dialog.predict.target.sex + '/icon' + this.dialog.predict.target.img.toString().padStart( 2, '0') + '.png'"
+					/>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.predict.show = false"
+					>
+						確認
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!-- 霊媒結果-->
+		<v-dialog
+		v-model="this.dialog.expose.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card maxWidth="400" height="400">
+				<v-card-title>
+					霊媒結果
+				</v-card-title>
+				<v-card-text 
+				style="background-size: contain; background-position: center; text-shadow: 0 0 5px black;"
+				:style="{ backgroundImage: `url('${this.dialog.expose.target.role.img}')` }">
+					{{ this.dialog.expose.target.name }}さんは、{{ this.dialog.expose.target.role.name }}です。
+					<img 
+					style="width:100px; height:100px; border-radius: 50%;"
+					:src="'../image/avatar/' + this.dialog.expose.target.sex + '/icon' + this.dialog.expose.target.img.toString().padStart( 2, '0') + '.png'"
+					/>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.expose.show = false"
+					>
+						確認
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!--Notifyダイアログ-->
+		<v-dialog 
+		v-model="this.dialog.copyright.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card maxWidth="400" height="400">
+				<v-card-text style="overflow-y: auto;">
+					<div style="font-size:smaller;">
+						<h2>素材提供</h2>
+						<ul style="margin-left:20px;">
+							<li>
+								<a href="https://blog.goo.ne.jp/akarise" target="_blank">ゆうひな様</a>
+							</li>
+							<li>
+								効果音：<a href="https://soundeffect-lab.info/" target="_blank">効果音ラボ様</a>
+							</li>
+							<li>
+								画像生成AI：<a href="https://www.bing.com/images/create?FORM=GDPCLS" target="_blank">Bing Image Creator</a>
+							</li>
+							<li>
+								画像編集ツール：<a href="https://www.befunky.com/create/photo-to-art/" target="_blank">Photo Editor</a>
+							</li>
+						</ul>
+						<div style="font-size:smaller;">
+							※素敵な素材、ツールのご提供に、感謝して使わせていただいております。
+						</div>
+						<h2>ソース</h2>
+						<div>
+							<img 
+							src="../../image/github-mark.svg" 
+							class="icon" 
+							style="filter: drop-shadow(2px 2px 2px #66c);width:30px;height:30px;"
+							/>
+							<a href="https://github.com/renoneve/jinro" target="_blank">
+								https://github.com/renoneve/jinro
+							</a>
+							<div style="font-size:smaller;">
+								※vue+laravel勉強目的で作成したものです。非効率な記述や細かな不具合などあるかもしれません。
+							</div>
+						</div>
+					</div>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.logout();"
+					>
+						ログアウト
+					</v-btn>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.copyright.show = false;"
+					>
+						閉じる
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!--確認ダイアログ-->
+		<v-dialog 
+		v-model="this.dialog.confirm.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card maxWidth="400" height="400">
+				<v-card-text style="overflow-y: auto;">
+					{{ this.dialog.confirm.message }}
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.confirm.ret = true; this.dialog.confirm.show = false;"
+					>
+						はい
+					</v-btn>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.confirm.ret = false; this.dialog.confirm.show = false;"
+					>
+						いいえ
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!--勝敗表示ダイアログ-->
+		<v-dialog
+		v-model="this.dialog.win.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card maxWidth="400" height="100vh">
+				<v-card-title>
+					結果
+				</v-card-title>
+				<v-card-text class="win">
+					{{ this.dialog.win.team }}チームの勝利です！
+					<div style="clear:left;">
+						<div 
+						style="float:left; margin:10px; text-align:center;"
+						v-for="n in this.dialog.win.players.length" :key="n"
+						>
+							<img :src="'../image/avatar/' + this.dialog.win.players[n-1].sex + '/icon' + this.dialog.win.players[n-1].img.toString().padStart( 2, '0') + '.png'"
+							class="icon"
+							:style="{ boxShadow: `0px 5px 10px ${this.dialog.win.players[n-1].role.color}` }"
+							/>
+							<div>
+								{{ this.dialog.win.players[n-1].name }}[{{ this.dialog.win.players[n-1].role.name }}]
+							</div>
+						</div>
+					</div>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.win.show = false;"
+					>
+						確認
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<div id="controll">
+			<div v-if="this.me.flgDead == 1">
+				あなたは投獄されています。他のプレイヤーの動向を見守りましょう
+			</div>
+			<div v-else>
+				<!--未入室-->
+				<v-row :class="[this.info.time==-1 ? 'scaleShow': 'scaleHide']">
+					<v-col>
+						<v-btn
+						@click="this.dialog.roomInfo.show = true;"
+						>
+							部屋情報
+						</v-btn>
+					</v-col>
+					<v-col>
+						<v-btn
+						@click="this.dialog.myCard.show = true;"
+						>
+							自カード
+						</v-btn>
+					</v-col>
+				</v-row>
+				<!--夕刻-->
+				<v-row :class="[this.info.time==0 ? 'scaleShow': 'scaleHide']">
+					<v-col>
+						<v-btn
+						@click="this.act(this.const.actions.vote);"
+						>
+							投票
+						</v-btn>
+					</v-col>
+					<v-col>
+						<v-btn
+						@click="this.dialog.roomInfo.show = true;"
+						>
+							部屋情報
+						</v-btn>
+					</v-col>
+					<v-col>
+						<v-btn
+						@click="this.dialog.myCard.show = true;"
+						>
+							自カード
+						</v-btn>
+					</v-col>
+				</v-row>
+				<!--夜-->
+				<v-row :class="[this.info.time==1 ? 'scaleShow': 'scaleHide']">
+					<v-col>
+						<v-btn
+						@click="this.dialog.result.vote.show = true;"
+						>
+							投票結果確認
+						</v-btn>
+					</v-col>
+				</v-row>
+				<!--深夜-->
+				<v-row :class="[this.info.time==2 ? 'scaleShow': 'scaleHide']">
+					<v-col v-for="command in this.me.role.command">
+						<v-btn
+						@click="this.act(command.action);"
+						>
+							{{ command.name }}
+						</v-btn>
+					</v-col>
+					<v-col>
+						<v-btn
+						@click="this.dialog.roomInfo.show = true;"
+						>
+							部屋情報
+						</v-btn>
+					</v-col>
+					<v-col>
+						<v-btn
+						@click="this.dialog.myCard.show = true;"
+						>
+							自カード
+						</v-btn>
+					</v-col>
+				</v-row>
+				<!--朝-->
+				<v-row :class="[this.info.time==3 ? 'scaleShow': 'scaleHide']">
+					<v-col>
+						<v-btn
+						@click="this.dialog.result.action.show = true;"
+						>
+							襲撃結果確認
+						</v-btn>
+					</v-col>
+				</v-row>
+				<!--昼-->
+				<v-row :class="[this.info.time==4 ? 'scaleShow': 'scaleHide']">
+					<v-col>
+						<v-btn
+						@click="this.dialog.win.show = true;"
+						>
+							勝敗結果確認
+						</v-btn>
+					</v-col>
+				</v-row>
+				<div class="actionResult">
+					<div class="message">
+						{{ this.action.message }}
+					</div>
+					<div class="error">
+						{{ this.action.error }}
+					</div>
+				</div>
+			</div>
+		</div>
+		<footer @click="this.dialog.copyright.show = true;">
+			<Footer></Footer>
+		</footer>
+	</div>
 </template>

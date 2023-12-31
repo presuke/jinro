@@ -22,16 +22,8 @@ class Player extends BaseController
         try {
             $ret = [];
             $params = $request->all();
-            $ret['request'] = $params;
             DB::beginTransaction();
             try {
-
-                $work = DB::table('work')->where(
-                    [
-                        'id' => $params['workid']
-                    ]
-                )->first();
-
                 $player = DB::table('player')->where(
                     [
                         'roomid' => $params['roomid'],
@@ -44,9 +36,6 @@ class Player extends BaseController
                         'sex' => $params['sex'],
                         'img' => $params['img'],
                         'pass' => $params['pass'],
-                        'workid' => $params['workid'],
-                        'lifelevel' => $work->lifelevelMin,
-                        'money' => $work->salary,
                     ]
                 );
                 DB::commit();

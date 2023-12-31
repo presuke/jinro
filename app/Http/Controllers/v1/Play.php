@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\v1;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use App\Service\Auth;
 use App\Service\Action;
+use App\Service\Scene;
 use DB;
 
 class Play extends BaseController
@@ -22,101 +20,105 @@ class Play extends BaseController
             $params = $request->all();
             $params = $params['params'];
             try {
-                $playerid = $params['playerid'];
+                $myid = $params['myid'];
+                $action = $params['action'];
                 $authToken = $params['authtoken'];
 
-                $checkStatus = Auth::checkAcuthToken($playerid, $authToken);
+                $checkStatus = Auth::checkAcuthToken($myid, $authToken);
                 if ($checkStatus == 0) {
                     //自プレイヤー
-                    $me = DB::table('player')->select('id', 'roomid', 'turn', 'workid', 'money', 'stress', 'lifelevel', 'flgFire')->where(
+                    $me = DB::table('player')->select('id', 'roomid', 'role')->where(
                         [
-                            'id' => $playerid,
+                            'id' => $myid,
                         ]
                     )->first();
 
-                    $action = $params['actionMode'];
+                    //自ルーム
+                    $room = DB::table('room')->select('id', 'day', 'time')->where(
+                        [
+                            'id' => $me->roomid,
+                        ]
+                    )->first();
+
+                    /*
+                    //重複チェック
+                    $exists = DB::table('history')->select('id', 'day', 'time')->where(
+                        [
+                            'roomid' => $room->id,
+                            'playerid' => $me->id,
+                            'day' => $room->day,
+                            'time' => $room->time,
+                        ]
+                    )->count();
+                    */
+
                     switch ($action) {
-                        case 'drowCard': {
-                                //fire判定前後で変化がないかチェック
-                                $isFireBefore = $me->flgFire;
-                                Action::jadgeFire($me);
-
-                                if ($isFireBefore == 0 && $me->flgFire == 0) {
-                                    //ラットレース継続
-                                    Action::drowCard($me);
-                                } else if ($isFireBefore == 1 && $me->flgFire == 1) {
-                                    //ファイア継続
-                                    Action::drowCardFire($me);
-                                } else if ($isFireBefore == 2 && $me->flgFire == 2) {
-                                    //ファイア継続
-                                    Action::drowCardFire($me);
-                                } else if ($isFireBefore == 1 && $me->flgFire == 2) {
-                                    //勝ち
-                                    Action::changeFire($me, 2);
-                                } else if ($isFireBefore == 0 && $me->flgFire == 1) {
-                                    //ファイア昇格
-                                    Action::changeFire($me, 1);
-                                } else {
-                                    //ラットレース降格
-                                    Action::changeFire($me, 0);
-                                }
+                        case 'vote': {
+                                $targetid = $params['targetid'];
+                                $ret = Action::vote($me, $room, $targetid);
                                 break;
                             }
 
-                        case 'work': {
-                                Action::work($me);
+                        case 'confirmVoteResult': {
+                                $param = [];
+                                $param['action'] = 'confirmVoteResult';
+                                $param['message'] = '投票結果確認';
+                                $ret = Action::confirm($me, $room, $param);
                                 break;
                             }
 
-                        case 'treat': {
-                                Action::treat($me);
+                        case 'confirmActionResult': {
+                                $param = [];
+                                $param['action'] = 'confirmActionResult';
+                                $param['message'] = '襲撃結果確認';
+                                $ret = Action::confirm($me, $room, $param);
                                 break;
                             }
 
-                        case 'riseLifeLevel': {
-                                Action::changeLifeLevel($me, true);
+                        case 'sleep': {
+                                $ret = Action::sleep($me, $room);
                                 break;
                             }
 
-                        case 'dropLifeLevel': {
-                                Action::changeLifeLevel($me, false);
+                        case 'attack': {
+                                $targetid = $params['targetid'];
+                                $ret = Action::attack($me, $room, $targetid);
                                 break;
                             }
 
-                        case 'buyEstate': {
-                                $ret = Action::buyEstate($me);
+                        case 'save': {
+                                $targetid = $params['targetid'];
+                                $ret = Action::save($me, $room, $targetid);
                                 break;
                             }
 
-                        case 'buyStock': {
-                                $ret = Action::buyStock($me, $params);
+                        case 'predict': {
+                                $targetid = $params['targetid'];
+                                $ret = Action::predict($me, $room, $targetid);
                                 break;
                             }
 
-                        case 'trade': {
-                                $ret = Action::trade($me, $params);
+                        case 'expose': {
+                                $targetid = $params['targetid'];
+                                $ret = Action::expose($me, $room, $targetid);
                                 break;
                             }
 
-                        case 'lostStock':
-                        case 'lostEstate':
-                        case 'noTrade': {
-                                $ret = Action::lostChance($me, $action);
+                        case 'change': {
+                                $targetid = $params['targetid'];
+                                $ret = Action::change($me, $room, $targetid);
                                 break;
                             }
 
-                        case 'banking': {
-                                $ret = Action::banking($me, $params['amount']);
+                        case 'consider': {
+                                $targetid = $params['targetid'];
+                                $ret = Action::consider($me, $room, $targetid);
                                 break;
                             }
 
-                        case 'confirm': {
-                                $ret = Action::confirm($me, $params['crntPlayer']);
-                                break;
-                            }
-
-                        case 'period': {
-                                Action::period($me);
+                        case 'freedom': {
+                                $targetid = $params['targetid'];
+                                $ret = Action::freedom($me, $room, $targetid);
                                 break;
                             }
 
@@ -164,7 +166,7 @@ class Play extends BaseController
                 if ($checkStatus == 0) {
 
                     //自プレイヤー
-                    $me = DB::table('player')->select('id', 'roomid', 'name', 'turn', 'workid', 'lifelevel')->where(
+                    $me = DB::table('player')->select('id', 'roomid', 'name', 'sex', 'img', 'role as roleid', 'flgDead')->where(
                         [
                             'id' => $playerid,
                         ]
@@ -181,128 +183,72 @@ class Play extends BaseController
                                 'id' => $me->roomid,
                             ]
                         )->first();
+                        $room->roles = json_decode($room->roles);
 
                         //自ルームのプレイヤー
-                        $players = DB::table('player')->select('id', 'roomid', 'name', 'sex', 'img', 'money', 'workid', 'stress', 'turn', 'lifelevel', 'flgFire')->where(
-                            [
-                                'roomid' => $me->roomid,
-                            ]
-                        )->orderBy('id')->get();
+                        $query = DB::table('player')->select(
+                            'id',
+                            'roomid',
+                            'name',
+                            'sex',
+                            'img',
+                            'flgDead',
+                            'flgDead as attacked',
+                        )->where(['roomid' => $me->roomid,])->orderBy('id');
+                        //神様と人狼・裏切者以外は情報を伏せる
+                        if ($me->roleid == 6) {
+                            $players = $query->selectRaw('role as roleid')->get();
+                        } else if ($me->roleid == 1 || $me->roleid == 5) {
+                            $players = $query->selectRaw("(CASE role WHEN 1 THEN 1 WHEN 5 THEN 5 ELSE 0 END) AS roleid")->get();
+                        } else {
+                            $players = $query->get();
+                        }
 
-                        //他プレイヤー名無しエラー
+                        $ret['info']['time'] = $room->time;
                         foreach ($players as $player) {
-                            if ($player->name == '') {
-                                $ret['code'] = 7;
+                            if ($player->sex == '') {
+                                $ret['info']['time'] = -1;
                             }
                         }
-                        if ($ret['code'] == 0) {
 
-                            //職業
-                            $works = [];
-                            $lstWork = DB::table('work')->get();
-                            foreach ($lstWork as $work) {
-                                $works[$work->id] = $work;
-                            }
-
-                            //資産
-                            $assets = DB::table('asset')->where(
-                                [
-                                    'roomid' => $me->roomid,
-                                ]
-                            )->orderBy('playerid')->get();
-
-                            //順番の人を特定
-                            $crntPlayer = $players[0];
-                            for ($idx = 0; $idx < count($players); $idx++) {
-                                $player = $players[$idx];
-                                if ($player->turn < $crntPlayer->turn) {
-                                    $crntPlayer = $player;
+                        //各タイムゾーンについて、状況に応じて値を付加する
+                        switch ($ret['info']['time']) {
+                                //未入室者あり
+                            case -1: {
+                                    $ret['info']['message'] = '未入室の人がいます。もう少し待ちましょう。';
                                     break;
                                 }
-                            }
-
-                            //直近のプレイヤーのアクション(confirm以外)
-                            $action = [];
-                            $history = DB::table('history')->select('roomid', 'playerid', 'turn', 'action', 'parameter')->where(
-                                [
-                                    'roomid' => $me->roomid,
-                                ]
-                            )->where('action', '<>', 'confirm')->orderBy('ins', 'DESC')->first();
-                            if ($history == null) {
-                                $action['event'] = 0;
-                            } else {
-                                $action['turn'] = $history->turn;
-                                $action['action'] = $history->action;
-                                $parameter = json_decode($history->parameter);
-                                $action['parameter'] = $parameter;
-                                switch ($history->action) {
-                                    case 'drowCard': {
-                                            //資産再取得
-                                            $assets = DB::table('asset')->select(
-                                                'id',
-                                                'roomid',
-                                                'playerid',
-                                                'turn',
-                                                'type',
-                                                'buy',
-                                                'sell',
-                                                'return',
-                                                'has',
-                                                DB::raw("'false' as trade")
-                                            )->where(
-                                                [
-                                                    'roomid' => $me->roomid,
-                                                ]
-                                            )->orderBy('playerid')->get();
-                                            $action['event'] = $parameter->event;
-                                            break;
-                                        }
-
-                                    case 'loan': {
-                                            $action['event'] = $parameter->event;
-                                            break;
-                                        }
-
-                                    case 'work':
-                                    case 'treat':
-                                    case 'riseLifeLevel':
-                                    case 'dropLifeLevel':
-                                    case 'trade':
-                                    case 'noTrade':
-                                    case 'buyStock':
-                                    case 'lostStock':
-                                    case 'buyEstate':
-                                    case 'lostEstate':
-                                    case 'sic':
-                                    case 'periodComplete':
-                                    case 'riseZone':
-                                    case 'dropZone':
-                                    case 'win':
-                                    case 'confirm': {
-                                            $action['event'] = 99;
-                                            break;
-                                        }
-
-                                    case 'confirmAll': {
-                                            $action['event'] = 0;
-                                            break;
-                                        }
-
-                                    default: {
-                                            $action['event'] = 9;
-                                            break;
-                                        }
+                                //投票中
+                            case 0: {
+                                    Scene::vote($ret, $room, $players);
+                                    break;
                                 }
-                            }
-
-                            $ret['me'] = $me;
-                            $ret['room'] = $room;
-                            $ret['works'] = $works;
-                            $ret['players'] = $players;
-                            $ret['assets'] = $assets;
-                            $ret['crntPlayer'] = $crntPlayer;
-                            $ret['action'] = $action;
+                                //投票結果確認待ち中
+                            case 1: {
+                                    Scene::voteResult($ret, $room, $players, $me);
+                                    break;
+                                }
+                                //行動結果確認待ち中
+                            case 2: {
+                                    Scene::action($ret, $room, $players, $me);
+                                    break;
+                                }
+                                //行動結果確認待ち中
+                            case 3: {
+                                    Scene::actionResult($ret, $room, $players, $me);
+                                    break;
+                                }
+                                //勝敗
+                            case 4: {
+                                    Scene::gameset($ret, $room, $players);
+                                    break;
+                                }
                         }
+
+                        $ret['me'] = $me;
+                        $ret['room'] = $room;
+                        $ret['players'] = $players;
+                        //$ret['playersDone'] = $playersDone;
                     }
                 } else {
                     $ret['code'] = $checkStatus;

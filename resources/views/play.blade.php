@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Cash Flow</title>
+  <title>Jinro</title>
   @vite(['resources/css/app.css', 'resources/js/play/app.js'])
   <style>
     body {
@@ -29,7 +29,7 @@
 
     #main {
       margin: 0px;
-      background-color: #400;
+      background-color: #333;
       text-align: center;
     }
 

@@ -15,12 +15,21 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/room/{any?}', function () {
     return view('room');
-})->where('any',
+})->where(
+    'any',
     '.*'
 );
 
 Route::get('/play/{any?}', function () {
     return view('play');
-})->where('any',
+})->where(
+    'any',
+    '.*'
+);
+
+Route::get('/}', function () {
+    return view('index');
+})->where(
+    'any',
     '.*'
 );

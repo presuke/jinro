@@ -6,143 +6,36 @@ use DB;
 
 class Action
 {
-  public static function confirm($me, $crntPlayer)
+  public static function vote($me, $room, $targetid)
   {
     $ret = [];
-
     try {
-      $parameter = [];
-      //誰のどのターンに対するConfirmか
-      $parameter['crntPlayerRoomid'] = $crntPlayer['roomid'];
-      $parameter['crntPlayerid'] = $crntPlayer['id'];
-      $parameter['crntPlayerTurn'] = $crntPlayer['turn'];
-
-
-      //既にConfirm済みか？
-      $existsMyConfirm = DB::table('history')->where(
-        [
-          'roomid' => $me->roomid,
-          'playerid' => $me->id,
-          'turn' => $me->turn,
-          'action' => 'confirm',
-          'parameter' => json_encode($parameter)
-        ]
-      )->count();
 
       DB::beginTransaction();
-      //confirm情報がなければ、historyへInsert
-      if ($existsMyConfirm == 0) {
-        DB::table('history')->insert([
-          'roomid' => $me->roomid,
+      //history
+      $myAction = DB::table('history')->where(
+        [
+          'roomid' => $room->id,
           'playerid' => $me->id,
-          'turn' => $me->turn,
-          'action' => 'confirm',
-          'parameter' => json_encode($parameter)
-        ]);
-      }
-
-      //部屋の人数
-      $playerNum = DB::table('player')->where([
-        'roomid' => $me->roomid,
-      ])->count();
-
-      //confirmした人の人数
-      $confirmedPlayerNum = DB::table('history')->where([
-        'roomid' => $me->roomid,
-        'action' => 'confirm',
-        'parameter' => json_encode($parameter)
-      ])->count();
-
-      //全員confirm済かどうか
-      $existsAllConfirm = DB::table('history')->where([
-        'roomid' => $me->roomid,
-        'action' => 'confirmAll',
-        'parameter' => json_encode($parameter)
-      ])->count();
-
-      //全員確認したらターンを進める
-      if (
-        $playerNum == $confirmedPlayerNum &&
-        $existsAllConfirm == 0
-      ) {
-
-        //資産の推移を記録
-        $crntPlayersAssets = DB::table('asset')->select(
-          'buy',
-          'type',
-          'has'
-        )->where(
-          ['roomid' => $crntPlayer['roomid'], 'playerid' => $crntPlayer['id']]
-        )->get();
-
-        $amountStock = 0;
-        $amountEstate = 0;
-        $amountLoan = 0;
-        $amountMoney = 0;
-        foreach ($crntPlayersAssets as $asset) {
-          if ($asset->type == 'stock') {
-            $amountStock += $asset->buy * $asset->has;
-          } else if ($asset->type == 'estate') {
-            $amountEstate += $asset->buy * $asset->has;
-          } else if ($asset0 > type == 'loan') {
-            $amountLoan += $asset->buy * $asset->has;
-          }
-        }
-
-        $player = DB::table('player')->select('money')->where([
-          'roomid' => $crntPlayer['roomid'],
-          'id' => $crntPlayer['id'],
-        ])->first();
-        $amountMoney = $player->money;
-
-        $existsTrans = DB::table('trans')->where([
-          'roomid' => $crntPlayer['roomid'],
-          'id' => $crntPlayer['id'],
-          'turn' => $crntPlayer['turn'],
-        ])->count();
-
-        if ($existsTrans == 0) {
-          DB::table('trans')->insert([
-            'roomid' => $crntPlayer['roomid'],
-            'playerid' => $crntPlayer['id'],
-            'turn' => $crntPlayer['turn'],
-            'money' => $amountMoney,
-            'stock' => $amountStock,
-            'estate' => $amountEstate,
-            'loan' => $amountLoan,
-          ]);
-        } else {
-          DB::table('trans')->where([
-            'roomid' => $crntPlayer['roomid'],
-            'id' => $crntPlayer['id'],
-            'turn' => $crntPlayer['turn'],
-          ])->update([
-            'money' => $amountMoney,
-            'stock' => $amountStock,
-            'estate' => $amountEstate,
-            'loan' => $amountLoan,
-          ]);
-        }
-
-        DB::table('player')->where([
-          'roomid' => $crntPlayer['roomid'],
-          'id' => $crntPlayer['id'],
-        ])->update([
-          'turn' => $crntPlayer['turn'] + 1,
-        ]);
-
-        //history
+          'day' => $room->day,
+          'time' => $room->time,
+          'action' => 'vote',
+        ]
+      );
+      if ($myAction->count() == 0) {
         DB::table('history')->insert([
-          'roomid' => $crntPlayer['roomid'],
-          'playerid' => $crntPlayer['id'],
-          'turn' => $crntPlayer['turn'],
-          'action' => 'confirmAll',
-          'parameter' => json_encode($parameter),
+          'roomid' => $room->id,
+          'playerid' => $me->id,
+          'day' => $room->day,
+          'time' => $room->time,
+          'action' => 'vote',
+          'targetid' => $targetid,
         ]);
       } else {
-        $ret['message'] = '確認しました。他のプレイヤーが確認するの待ちましょう。';
+        $myAction->update(['targetid' => $targetid]);
       }
       DB::commit();
+      $ret['message'] = '投票完了しました。';
     } catch (\Exception $ex) {
       DB::rollback();
       $ret['code'] = 99;
@@ -151,56 +44,149 @@ class Action
     return $ret;
   }
 
-  public static function  work($me)
+  public static function confirm($me, $room, $param)
   {
     $ret = [];
     try {
-      //ストレスチェック
-      if ($me->stress > 10) {
-        //ランダム変数
-        $sic = (microtime(true) * 1000);
-        $sic = $sic % 10;
-        if ($sic > 5) {
-          $ret = self::treat($me, true);
+
+      DB::beginTransaction();
+      //history
+      $action = DB::table('history')->where(
+        [
+          'roomid' => $room->id,
+          'playerid' => $me->id,
+          'day' => $room->day,
+          'time' => $room->time,
+          'action' => $param['action'],
+        ]
+      );
+      if ($action->count() == 0) {
+        DB::table('history')->insert(
+          [
+            'roomid' => $room->id,
+            'playerid' => $me->id,
+            'day' => $room->day,
+            'time' => $room->time,
+            'action' => $param['action'],
+          ],
+        );
+      }
+      DB::commit();
+      $ret['message'] = $param['message'] . '完了しました。';
+    } catch (\Exception $ex) {
+      DB::rollback();
+      $ret['code'] = 99;
+      $ret['error'] = $ex->getMessage();
+    }
+    return $ret;
+  }
+
+  public static function sleep($me, $room)
+  {
+    $ret = [];
+    try {
+      $actionName = 'sleep';
+      $myAction = [
+        'roomid' => $room->id,
+        'playerid' => $me->id,
+        'day' => $room->day,
+        'time' => $room->time,
+      ];
+
+      //history
+      $action = DB::table('history')->where($myAction);
+      if ($action->count() == 0) {
+        $myAction['action'] = $actionName;
+        DB::beginTransaction();
+        DB::table('history')->insert($myAction);
+        DB::commit();
+      }
+      $ret['message'] = '就寝しました。';
+    } catch (\Exception $ex) {
+      DB::rollback();
+      $ret['code'] = 99;
+      $ret['error'] = $ex->getMessage();
+    }
+    return $ret;
+  }
+
+  public static function attack($me, $room, $targetid)
+  {
+    $ret = [];
+    try {
+      $actionName = 'attack';
+      if ($me->role != 1) {
+        $ret['error'] = 'あなたは人狼ではありません。';
+        return $ret;
+      }
+
+      $myAction = [
+        'roomid' => $room->id,
+        'playerid' => $me->id,
+        'day' => $room->day,
+        'time' => $room->time,
+      ];
+      $action = DB::table('history')->where($myAction);
+      DB::beginTransaction();
+      if ($action->count() == 0) {
+        $myAction['action'] = $actionName;
+        $myAction['targetid'] = $targetid;
+        DB::table('history')->insert($myAction);
+      } else {
+        $action->update(['action' => $actionName, 'targetid' => $targetid]);
+      }
+      DB::commit();
+      $ret['message'] = '襲撃完了しました。';
+    } catch (\Exception $ex) {
+      DB::rollback();
+      $ret['code'] = 99;
+      $ret['error'] = $ex->getMessage();
+    }
+    return $ret;
+  }
+
+  public static function save($me, $room, $targetid)
+  {
+    $ret = [];
+    try {
+      $actionName = 'save';
+      if ($me->role != 2) {
+        $ret['error'] = 'あなたは狩人ではありません。';
+        return $ret;
+      }
+      if ($room->day > 1) {
+        $lastTarget = DB::table('history')->where(
+          [
+            'roomid' => $room->id,
+            'playerid' => $me->id,
+            'day' => $room->day - 1,
+            'time' => $room->time,
+            'action' => $actionName,
+          ]
+        )->first();
+        if ($lastTarget->targetid == $targetid) {
+          $ret['error'] = '昨日と同じ人を守ることはできません。';
           return $ret;
         }
       }
-
-      //ランダム変数
-      $stress = (microtime(true) * 1000);
-      $stress = $stress % 3 + 1;
-
-      $mywork = DB::table('work')->select('salary')->where(
-        [
-          'id' => $me->workid,
-        ]
-      )->first();
-
-      $parameter = [];
-      $parameter['stress'] = $stress;
-      $parameter['money'] = $mywork->salary;
+      $myAction = [
+        'roomid' => $room->id,
+        'playerid' => $me->id,
+        'day' => $room->day,
+        'time' => $room->time,
+      ];
+      $action = DB::table('history')->where($myAction);
 
       DB::beginTransaction();
-      $player = DB::table('player')->where(
-        [
-          'roomid' => $me->roomid,
-          'id' => $me->id,
-        ]
-      )->update(
-        [
-          'money' => $me->money + $mywork->salary,
-          'stress' => $me->stress + $stress,
-        ]
-      );
-      //history
-      DB::table('history')->insert([
-        'roomid' => $me->roomid,
-        'playerid' => $me->id,
-        'turn' => $me->turn,
-        'action' => 'work',
-        'parameter' => json_encode($parameter),
-      ]);
+      if ($action->count() == 0) {
+        $myAction['action'] = $actionName;
+        $myAction['targetid'] = $targetid;
+        DB::table('history')->insert($myAction);
+      } else {
+        $action->update(['action' => $actionName, 'targetid' => $targetid]);
+      }
       DB::commit();
+      $ret['message'] = '防衛完了しました。';
     } catch (\Exception $ex) {
       DB::rollback();
       $ret['code'] = 99;
@@ -209,49 +195,57 @@ class Action
     return $ret;
   }
 
-  public static function  treat($me, $isSic = false)
+  public static function predict($me, $room, $targetid)
   {
     $ret = [];
     try {
-      //ランダム変数
-      $recover = (microtime(true) * 1000);
-      $recover = $recover % 5 + 2;
-
-      $cost = $isSic ? 12 : 10;
-      $payment = $recover * $cost * $me->lifelevel;
-
-      if ($recover > $me->stress) {
-        $stress = 0;
-      } else {
-        $stress = $me->stress - $recover;
+      $actionName = 'predict';
+      if ($me->role != 3) {
+        $ret['error'] = 'あなたは占い師ではありません。';
+        return $ret;
+      }
+      $target = DB::table('player')->where(
+        [
+          'roomid' => $room->id,
+          'id' => $targetid,
+        ]
+      )->first();
+      if ($target->flgDead == 1) {
+        $ret['error'] = '拉致・投獄されたプレイヤーを占うことはできません。';
+        return $ret;
       }
 
-      $parameter = [];
-      $parameter['money'] = $payment * -1;
-      $parameter['stress'] = $recover * -1;
-
-      DB::beginTransaction();
-      $player = DB::table('player')->where(
-        [
-          'roomid' => $me->roomid,
-          'id' => $me->id,
-        ]
-      )->update(
-        [
-          'money' => $me->money - $payment,
-          'stress' => $stress,
-        ]
-      );
-      //history
-      $action = $isSic ? 'sic' : 'treat';
-      DB::table('history')->insert([
-        'roomid' => $me->roomid,
+      $myAction = [
+        'roomid' => $room->id,
         'playerid' => $me->id,
-        'turn' => $me->turn,
-        'action' => $action,
-        'parameter' => json_encode($parameter),
-      ]);
-      DB::commit();
+        'day' => $room->day,
+        'time' => $room->time,
+      ];
+      $action = DB::table('history')->where($myAction);
+
+      if ($action->count() == 0) {
+        $myAction['action'] = $actionName;
+        $myAction['targetid'] = $targetid;
+        DB::beginTransaction();
+        DB::table('history')->insert($myAction);
+        DB::commit();
+      } else {
+        $ret['error'] = '1日に占うことができるのは1人のみです。';
+      }
+      $action = DB::table('history')->where($myAction)->first();
+      $target = DB::table('player')->where(
+        [
+          'roomid' => $room->id,
+          'id' => $action->targetid,
+        ]
+      )->first();
+      if ($target->role == 5) {
+        $target->role = 0;
+      }
+      $ret['result'][$actionName]['target'] = $target;
+      if (!isset($ret['message'])) {
+        $ret['message'] = $target->name . 'さんを占いました。';
+      }
     } catch (\Exception $ex) {
       DB::rollback();
       $ret['code'] = 99;
@@ -260,328 +254,194 @@ class Action
     return $ret;
   }
 
-  public static function banking($me, $amount)
+  public static function expose($me, $room, $targetid)
   {
     $ret = [];
     try {
-
-      $myloansThisTurn = DB::table('asset')->where(
+      $actionName = 'expose';
+      if ($me->role != 4) {
+        $ret['error'] = 'あなたは霊媒師ではありません。';
+        return $ret;
+      }
+      $target = DB::table('player')->where(
         [
-          'playerid' => $me->id,
-          'turn' => $me->turn,
-          'type' => 'loan',
+          'roomid' => $room->id,
+          'id' => $targetid,
         ]
-      )->count();
-      if ($myloansThisTurn > 0) {
-        $ret['error'] = 'このターンではもう借入できません。';
+      )->first();
+      if ($target->flgDead == 0) {
+        $ret['error'] = '霊媒対象は拉致・投獄されたプレイヤーだけです。';
         return $ret;
       }
 
+      $myAction = [
+        'roomid' => $room->id,
+        'playerid' => $me->id,
+        'day' => $room->day,
+        'time' => $room->time,
+      ];
+      $action = DB::table('history')->where($myAction);
 
-      $limitOfSalary = 10;
-      $mywork = DB::table('work')->select('salary')->where(
+      if ($action->count() == 0) {
+        $myAction['action'] = $actionName;
+        $myAction['targetid'] = $targetid;
+        DB::beginTransaction();
+        DB::table('history')->insert($myAction);
+        DB::commit();
+      } else {
+        $ret['error'] = '1日に霊媒することができるのは1人のみです。';
+      }
+      $action = DB::table('history')->where($myAction)->first();
+      $target = DB::table('player')->where(
         [
-          'id' => $me->workid,
+          'roomid' => $room->id,
+          'id' => $action->targetid,
         ]
       )->first();
 
-      $myloans = DB::table('asset')->where(
-        [
-          'playerid' => $me->id,
-          'type' => 'loan',
-        ]
-      )->get();
-
-      $myloanTotal = 0;
-      foreach ($myloans as $myloan) {
-        $myloanTotal += $myloan->buy;
-      }
-
-      if ($amount > $mywork->salary * $limitOfSalary - $myloanTotal) {
-        if ($mywork->salary * $limitOfSalary - $myloanTotal > 0) {
-          $ret['error'] = '借入限度額は、' . number_format($mywork->salary * $limitOfSalary - $myloanTotal) . 'までです。';
-        } else {
-          $ret['error'] = 'これ以上借り入れることはできません。';
-        }
-      } else {
-        $room = DB::table('room')->select('interest')->where(
-          [
-            'id' => $me->roomid,
-          ]
-        )->first();
-
-        $history = DB::table('history')->select('roomid', 'playerid', 'action', 'parameter')->where(
-          [
-            'roomid' => $me->roomid,
-            'playerid' => $me->id,
-          ]
-        )->orderBy('ins', 'DESC')->first();
-
-        $parameter = [];
-        foreach (json_decode($history->parameter) as $key => $value) {
-          $parameter[$key] = $value;
-        }
-        $parameter['loan'] = $amount;
-        $parameter['moneyBefore'] = $me->money;
-
-        DB::beginTransaction();
-        //asset
-        DB::table('asset')->insert([
-          'roomid' => $me->roomid,
-          'playerid' => $me->id,
-          'turn' => $me->turn,
-          'type' => 'loan',
-          'buy' => $amount,
-          'has' => 10,
-          'return' => $room->interest,
-        ]);
-
-        $player = DB::table('player')->where(
-          [
-            'roomid' => $me->roomid,
-            'id' => $me->id,
-          ]
-        )->update(
-          [
-            'money' => $me->money + $amount,
-          ]
-        );
-        //history
-        DB::table('history')->insert([
-          'roomid' => $me->roomid,
-          'playerid' => $me->id,
-          'turn' => $me->turn,
-          'action' => 'loan',
-          'parameter' => json_encode($parameter),
-        ]);
-        DB::commit();
-        $ret['message'] = number_format($amount) . 'の借入に成功しました。';
+      $ret['result'][$actionName]['target'] = $target;
+      if (!isset($ret['message'])) {
+        $ret['message'] = $target->name . 'さんを霊媒しました。';
       }
     } catch (\Exception $ex) {
       DB::rollback();
+      $ret['code'] = 99;
       $ret['error'] = $ex->getMessage();
     }
     return $ret;
   }
 
-  public static function buyEstate($me)
+  public static function change($me, $room, $targetid)
   {
     $ret = [];
     try {
-      $myestate = DB::table('asset')->select('id', 'buy')->where(
+      $actionName = 'change';
+      if ($me->role != 7) {
+        $ret['error'] = 'あなたは吸血鬼ではありません。';
+        return $ret;
+      }
+      $target = DB::table('player')->where(
         [
-          'playerid' => $me->id,
-          'turn' => $me->turn,
-          'type' => 'estate',
-          'has' => 0,
+          'roomid' => $room->id,
+          'id' => $targetid,
         ]
       )->first();
+      if ($target->flgDead == 1) {
+        $ret['error'] = '襲撃対象は拉致・投獄されていないプレイヤーだけです。';
+        return $ret;
+      }
 
-      if ($myestate->buy > $me->money) {
-        $ret['error'] = number_format($myestate->buy) . 'の物件を購入するお金がありません。';
+      $myAction = [
+        'roomid' => $room->id,
+        'playerid' => $me->id,
+        'day' => $room->day,
+        'time' => $room->time,
+      ];
+      $action = DB::table('history')->where($myAction);
+
+      DB::beginTransaction();
+      if ($action->count() == 0) {
+        $myAction['action'] = $actionName;
+        $myAction['targetid'] = $targetid;
+        DB::table('history')->insert($myAction);
       } else {
-        $room = DB::table('room')->select('interest')->where(
-          [
-            'id' => $me->roomid,
-          ]
-        )->first();
-
-        $parameter = [];
-        $parameter['buyEstate'] = $myestate;
-        $parameter['moneyBefore'] = $me->money;
-        $parameter['money'] = $myestate->buy * -1;
-        $parameter['estate'] = $myestate->buy;
-
-        DB::beginTransaction();
-        //asset
-        DB::table('asset')->where(['id' => $myestate->id,])->update(['has' => 1]);
-
-        $player = DB::table('player')->where(
-          [
-            'roomid' => $me->roomid,
-            'id' => $me->id,
-          ]
-        )->update(
-          [
-            'money' => $me->money - $myestate->buy,
-          ]
-        );
-        //history
-        DB::table('history')->insert([
-          'roomid' => $me->roomid,
-          'playerid' => $me->id,
-          'turn' => $me->turn,
-          'action' => 'buyEstate',
-          'parameter' => json_encode($parameter),
-        ]);
-        DB::commit();
-        $ret['message'] = '物件の購入に成功しました。';
+        $action->update(['action' => $actionName, 'targetid' => $targetid]);
       }
+      DB::commit();
+      $ret['message'] = '襲撃完了しました。';
     } catch (\Exception $ex) {
       DB::rollback();
+      $ret['code'] = 99;
       $ret['error'] = $ex->getMessage();
     }
     return $ret;
   }
 
-  public static function buyStock($me, $params)
+  public static function freedom($me, $room, $targetid)
   {
     $ret = [];
     try {
-
-      $totalAmount = 0;
-      $assets = $params['assets'];
-      foreach ($assets as $asset) {
-        if (
-          $asset['playerid'] == $me->id &&
-          $asset['turn'] == $me->turn &&
-          $asset['has'] > 0
-        ) {
-          $assetRecord = DB::table('asset')->select('buy')->where(['id' => $asset['id']])->first();
-          $totalAmount += $assetRecord->buy * $asset['has'];
-        }
+      $actionName = 'freedom';
+      if ($me->role != 9) {
+        $ret['error'] = 'あなたは天使ではありません。';
+        return $ret;
       }
-
-      if ($totalAmount == 0) {
-        $ret['error'] = '購入する株券が指定されていません。';
+      $target = DB::table('player')->where(
+        [
+          'roomid' => $room->id,
+          'id' => $targetid,
+        ]
+      )->first();
+      if ($target->flgDead == 0) {
+        $ret['error'] = '救出対象は拉致・投獄されているプレイヤーだけです。';
         return $ret;
       }
 
-      if ($totalAmount > $me->money) {
-        $ret['error'] = '所持金が少なくて買えませんでした。(' . number_format($totalAmount) . '必要)';
-        return $ret;
-      }
+      $myAction = [
+        'roomid' => $room->id,
+        'playerid' => $me->id,
+        'day' => $room->day,
+        'time' => $room->time,
+      ];
+      $action = DB::table('history')->where($myAction);
 
       DB::beginTransaction();
-      //asset
-      foreach ($assets as $asset) {
-        if ($asset['playerid'] == $me->id && $asset['has'] > 0) {
-          DB::table('asset')->where(
-            [
-              'id' => $asset['id'],
-            ]
-          )->update(
-            [
-              'has' => $asset['has'],
-            ]
-          );
-        }
+      if ($action->count() == 0) {
+        $myAction['action'] = $actionName;
+        DB::table('history')->insert($myAction);
+      } else {
+        $action->update(['action' => $actionName, 'targetid' => $targetid]);
       }
-
-      $player = DB::table('player')->where(
-        [
-          'roomid' => $me->roomid,
-          'id' => $me->id,
-        ]
-      )->update(
-        [
-          'money' => $me->money - $totalAmount,
-        ]
-      );
-      //history
-      $parameter = [];
-      $parameter['money'] = -1 * $totalAmount;
-      $parameter['stock'] = $totalAmount;
-      DB::table('history')->insert([
-        'roomid' => $me->roomid,
-        'playerid' => $me->id,
-        'turn' => $me->turn,
-        'action' => 'buyStock',
-        'parameter' => json_encode($parameter),
-      ]);
       DB::commit();
-      $ret['message'] = '合計' . number_format($totalAmount) . 'の株式投資をしました。';
+      $ret['message'] = '救出完了しました。';
     } catch (\Exception $ex) {
       DB::rollback();
+      $ret['code'] = 99;
       $ret['error'] = $ex->getMessage();
     }
     return $ret;
   }
 
-  public static function trade($me, $params)
+  public static function consider($me, $room, $targetid)
   {
     $ret = [];
     try {
+      $myAction = [
+        'roomid' => $room->id,
+        'playerid' => $me->id,
+        'day' => $room->day,
+        'time' => $room->time,
+      ];
+      $action = DB::table('history')->where($myAction);
 
-      $totalSellStock = 0;
-      $totalBuyStock = 0;
-      $totalSellEstate = 0;
-      $totalBuyEstate = 0;
-      $assetRecords = DB::table('asset')->select('id', 'playerid', 'type', 'buy', 'sell', 'has')->where(['playerid' => $me->id])->get();
-      $assets = $params['assets'];
-      $lstAssetSells = [];
-      foreach ($assets as $asset) {
-        if ($asset['trade'] == 'true') {
-          foreach ($assetRecords as $assetRecord) {
-            if (
-              $assetRecord->has > 0 &&
-              $asset['id'] == $assetRecord->id
-            ) {
-              if ($assetRecord->type == 'stock') {
-                $totalSellStock += $assetRecord->sell * $assetRecord->has;
-                $totalBuyStock += $assetRecord->buy * $assetRecord->has;
-                $lstAssetSells[] = $assetRecord->id;
-              } else if ($assetRecord->type == 'estate') {
-                $totalSellEstate += $assetRecord->sell * $assetRecord->has;
-                $totalBuyEstate += $assetRecord->buy * $assetRecord->has;
-                $lstAssetSells[] = $assetRecord->id;
-              }
-            }
-          }
-        }
+      $rand = rand(1, 100);
+      if ($rand > 50) {
+        $actionName = 'sleep';
+      } else {
+        $actionName = 'consider';
       }
-
-      if (count($lstAssetSells) == 0) {
-        $ret['error'] = '売却する資産が指定されていません。';
-        return $ret;
+      $rand = rand(1, 100);
+      if ($rand > 50) {
+        $ret['result']['consider'] = 'voice';
       }
 
       DB::beginTransaction();
-      //asset
-      foreach ($lstAssetSells as $assetid) {
-        DB::table('asset')->where(
-          [
-            'id' => $assetid,
-          ]
-        )->update(
-          [
-            'has' => 0,
-          ]
-        );
+      if ($action->count() == 0) {
+        $myAction['action'] = $actionName;
+        DB::table('history')->insert($myAction);
+      } else {
+        $action->update(['action' => $actionName, 'targetid' => $targetid]);
       }
-
-      $player = DB::table('player')->where(
-        [
-          'roomid' => $me->roomid,
-          'id' => $me->id,
-        ]
-      )->update(
-        [
-          'money' => $me->money + $totalSellStock + $totalSellEstate,
-        ]
-      );
-      //history
-      $parameter = [];
-      $parameter['money'] = $totalSellStock + $totalSellEstate;
-      $parameter['stock'] = $totalBuyStock * -1;
-      $parameter['estate'] = $totalBuyEstate * -1;
-      $parameter['profit'] = $totalSellStock + $totalSellEstate - $totalBuyStock - $totalBuyEstate;
-      DB::table('history')->insert([
-        'roomid' => $me->roomid,
-        'playerid' => $me->id,
-        'turn' => $me->turn,
-        'action' => 'trade',
-        'parameter' => json_encode($parameter),
-      ]);
       DB::commit();
-      $ret['message'] = '合計' . number_format($totalSellStock + $totalSellEstate) . 'の資産売却をしました。';
+      $ret['message'] = '検討しました。';
     } catch (\Exception $ex) {
       DB::rollback();
+      $ret['code'] = 99;
       $ret['error'] = $ex->getMessage();
     }
     return $ret;
   }
-
+  /*
   public static function lostChance($me, $action)
   {
     $ret = [];
@@ -1282,4 +1142,5 @@ class Action
       $ret['errors'][] = $ex;
     }
   }
+  */
 }

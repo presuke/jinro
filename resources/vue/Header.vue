@@ -1,17 +1,10 @@
 <template>
-    <x-sign id="title">The Cash Flow</x-sign>
-    <!--
-    <v-toolbar fluid density="comfortable">
-		プレイルーム
-		<v-btn @click="logout()">ログアウト</v-btn>
-		{{ $parent.problem }}
-	</v-toolbar>
-    -->
+    <x-sign id="title">人狼</x-sign>
+
 </template>
 <style>
     #title {
-        background-color:darkred;
-        position:flex;
+        background-color:darkmagenta;
     }
 
     x-sign {
@@ -28,12 +21,12 @@
     }
     x-sign:nth-of-type(1) {
         color: lightyellow;
-        --color1: yellow;
-        --color2: gold;
-        --color3: orange;
-        --color4: darkred;
-        font-family: 'Shrikhand', cursive;
+        --color1: red;
+        --color2: red;
+        --color3: red;
+        --color4: pink;
         font-size: min(10vw, 40px);
         font-weight: 700;
+        font-family: 'Reggae One', cursive;
     }
 </style>
