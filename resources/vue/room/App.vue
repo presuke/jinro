@@ -134,7 +134,7 @@ export default {
 				this.se.Error.play();
 			}else{
 				axios
-				.post('../api/v1/player/create', this.form.player)
+				.post(this.url + '/api/v1/player/create', this.form.player)
 				.then((response) => {
 					try {
 						if(response.data.player != undefined){
@@ -180,7 +180,7 @@ export default {
 		createRoom(){
 			this.form.room.step = 3;
 			axios
-			.post('../api/v1/room/create', {
+			.post(this.url+ '/api/v1/room/create', {
 				params: this.form.room,
 			})
 			.then((response) => {
