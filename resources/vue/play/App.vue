@@ -626,7 +626,7 @@ export default {
 			this.dialog.login.error = '';
 
 			axios
-			.post(this.this.rootPath + '/api/v1/play/login', {
+			.post(this.rootPath + '/api/v1/play/login', {
 				playerid: this.playerid,
 				pass: this.dialog.login.pass,
 			})
