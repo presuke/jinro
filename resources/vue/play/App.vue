@@ -798,7 +798,7 @@ export default {
 		v-bind:class="[this.dialog.win.show ? 'scaleShow' : 'scaleHide']"
 		style="margin:10px: padding:10px;"
 		>
-			<div style="font-size:3vw;">
+			<div style="font-size:30px;">
 				<div>勝負あり！！</div>
 				<div>{{ this.dialog.win.team }}チームの勝利です！</div>
 			</div>
