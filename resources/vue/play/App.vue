@@ -382,6 +382,9 @@ export default {
 											}
 										}
 									}
+									if(this.dialog.result.action.message.length == 0){
+										this.dialog.result.action.message.push('昨夜は何も起こりませんでした。');
+									}
 								}
 								break;
 							}
@@ -799,7 +802,6 @@ export default {
 		style="margin:10px: padding:10px;"
 		>
 			<div style="font-size:30px;">
-				<div>勝負あり！！</div>
 				<div>{{ this.dialog.win.team }}チームの勝利です！</div>
 			</div>
 			<div class="win">
