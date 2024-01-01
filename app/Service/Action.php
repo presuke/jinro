@@ -90,6 +90,7 @@ class Action
       $myAction = [
         'roomid' => $room->id,
         'playerid' => $me->id,
+        'targetid' => 0,
         'day' => $room->day,
         'time' => $room->time,
       ];
