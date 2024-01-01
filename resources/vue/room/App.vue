@@ -405,7 +405,7 @@ export default {
 								<div v-if="player.name != ''">
 									<div style="float: left;">
 										<img 
-										:src="'../image/avatar/' + player.sex + '/icon0' + player.img + '.png'" 
+										:src="rootPath + '/image/avatar/' + player.sex + '/icon0' + player.img + '.png'" 
 										class="rounded-circle"
 										Width="30"
 										Height="30"
@@ -418,7 +418,7 @@ export default {
 								<div v-else>
 									<div style="float: left;">
 										<img 
-										:src ="'../image/avatar/random.png'" 
+										:src ="rootPath + '/image/avatar/random.png'" 
 										class="rounded-circle"
 										Width="30"
 										Height="30"
