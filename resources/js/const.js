@@ -30,6 +30,7 @@ export default {
                 img: ImgC0,
                 color: 'gray',
                 num: 0,
+                power: false,
                 command:[]
             },
             {
@@ -39,6 +40,7 @@ export default {
                 img: ImgC1,
                 color: 'red',
                 num: 0,
+                power: true,
                 command:[]
             },
             {
@@ -48,6 +50,7 @@ export default {
                 img: ImgC2,
                 color: 'green',
                 num: 0,
+                power: false,
                 command:[]
             },
             {
@@ -57,6 +60,7 @@ export default {
                 img: ImgC3,
                 color: 'cyan',
                 num: 0,
+                power: false,
                 command:[]
             },
             {
@@ -66,6 +70,7 @@ export default {
                 img: ImgC4,
                 color: 'magenta',
                 num: 0,
+                power: false,
                 command:[]
             },
             {
@@ -75,6 +80,7 @@ export default {
                 img: ImgC5,
                 color: 'orange',
                 num: 0,
+                power: false,
                 command:[]
             },
             {
@@ -84,6 +90,7 @@ export default {
                 img: ImgC6,
                 color: 'gold',
                 num: 0,
+                power: true,
                 command:[]
             },
             {
@@ -93,6 +100,7 @@ export default {
                 img: ImgC7,
                 color: 'purple',
                 num: 0,
+                power: false,
                 command:[]
             },
             {
@@ -102,6 +110,7 @@ export default {
                 img: ImgC8,
                 color: 'darkyellow',
                 num: 0,
+                power: false,
                 command:[]
             },
             {
@@ -111,6 +120,7 @@ export default {
                 img: ImgC9,
                 color: 'lightyellow',
                 num: 0,
+                power: false,
                 command:[]
             },
         ],

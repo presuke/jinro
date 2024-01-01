@@ -239,18 +239,20 @@ export default {
 							//投票中
 							case  0:{
 								const votes = response.data.votes;
-								try{
-									for(let idx = 0; idx < this.players.length; idx++){
-										let player = this.players[idx];
-										votes.forEach((vote) => {
-											if(vote.playerid == player.id){
-												player.done = 1;
-											}
-										});
-										this.players[idx] = player;
+								if(votes != undefined){
+									try{
+										for(let idx = 0; idx < this.players.length; idx++){
+											let player = this.players[idx];
+											votes.forEach((vote) => {
+												if(vote.playerid == player.id){
+													player.done = 1;
+												}
+											});
+											this.players[idx] = player;
+										}
+									}catch(error){
+										console.log(error);
 									}
-								}catch(error){
-									console.log(error);
 								}
 								//投票終了までのカウントダウン
 								if(this.info.countdown != undefined){
@@ -682,6 +684,16 @@ export default {
 			});
 			return ret;
 		},
+		selectPlayer(player){
+			if(this.me.id == player.id) { 
+				if(this.me.role.power){
+					this.isUsingPower = !this.isUsingPower; 
+				}
+				this.playerSelected ={}; 
+			}else{ 
+				this.playerSelected = player; 
+			}
+		},
 		checkString: function (inputdata) {
 			var regExp = /^[a-zA-Z0-9_]*$/;
 			return regExp.test(inputdata);
@@ -738,7 +750,7 @@ export default {
 				v-else
 				class="player"
 				v-bind:class="[this.playerSelected.id == player.id ? 'selectedOn' : 'selectedOff']"
-				@click="if(this.me.id == player.id) { this.isUsingPower = !this.isUsingPower; this.playerSelected ={}; }else{ this.playerSelected = player; }"
+				@click="selectPlayer(player)"
 				>
 					<div 
 					class="votenum"
