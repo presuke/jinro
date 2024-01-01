@@ -48,7 +48,7 @@ class Scene
         }
 
         if (count($topPlayers) == 1) {
-          $timelimit = 20 - (strtotime(now()) - strtotime($votes->max('upd')));
+          $timelimit = 30 - (strtotime(now()) - strtotime($votes->max('upd')));
           if ($timelimit > 0) {
             //$ret['info']['message'] = $timelimit . '秒後に投票を締め切ります。変更するならお早めに。';
             $ret['info']['countdown']['sec'] = $timelimit;
@@ -143,7 +143,6 @@ class Scene
     }
   }
 
-
   public static function action(&$ret, $room, &$players, $me)
   {
     try {
@@ -174,7 +173,7 @@ class Scene
       $ret['acted'] = $acted->get();
       //生きてる人と行動済みの人を比べる
       if ($playerNum == $acted->count()) {
-        $timelimit = 20 - (strtotime(now()) - strtotime($acted->max('upd')));
+        $timelimit = 30 - (strtotime(now()) - strtotime($acted->max('upd')));
         if ($timelimit > 0) {
           //$ret['info']['message'] = $timelimit . '秒後に夜が明けます。結果は朝知ることになるでしょう・・・';
           $ret['info']['countdown']['sec'] = $timelimit;

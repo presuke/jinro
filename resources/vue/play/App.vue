@@ -192,9 +192,9 @@ export default {
 				if(this.countdown.sec == 0){
 					clearInterval(this.countdown.timer);
 					this.countdown.timer = null;
-					this.info = this.countdown.action + 'の締め切り時間が来ました。他のプレイヤーが' + this.countdown.action + 'を変更しなければ結果発表に移ります。';
+					this.info.message = this.countdown.action + 'の締め切り時間が来ました。他のプレイヤーが' + this.countdown.action + 'を変更しなければ結果発表に移ります。';
 				}else{
-					this.info = 'あと'+ this.countdown.sec + '秒で' + this.countdown.action + 'を締め切ります。変更があるならお早めに';
+					this.info.message = 'あと'+ this.countdown.sec + '秒で' + this.countdown.action + 'を締め切ります。変更があるならお早めに';
 				}
 				this.countdown.sec--;
 			}, this.countdown.const.interval);
@@ -239,19 +239,23 @@ export default {
 							//投票中
 							case  0:{
 								const votes = response.data.votes;
-								for(let idx = 0; idx < this.players.length; idx++){
-									let player = this.players[idx];
-									votes.forEach((vote) => {
-										if(vote.playerid == player.id){
-											player.done = 1;
-										}
-									});
-									this.players[idx] = player;
+								try{
+									for(let idx = 0; idx < this.players.length; idx++){
+										let player = this.players[idx];
+										votes.forEach((vote) => {
+											if(vote.playerid == player.id){
+												player.done = 1;
+											}
+										});
+										this.players[idx] = player;
+									}
+								}catch(error){
+									console.log(error);
 								}
 								//投票終了までのカウントダウン
 								if(this.info.countdown != undefined){
-									this.countdown.sec = response.info.countdown.sec;
-									this.countdown.action = response.info.countdown.action;
+									this.countdown.sec = response.data.info.countdown.sec;
+									this.countdown.action = response.data.info.countdown.action;
 									this.startCountDownTimer();
 								}
 								break;
@@ -409,6 +413,11 @@ export default {
 									this.se.Win.play();
 									this.dialog.win.show = true;
 								}
+								break;
+							}
+							//?
+							default:{
+								this.errors = JSON.stringify(response.data);
 								break;
 							}
 						}
@@ -775,7 +784,9 @@ export default {
 				<div>{{ this.dialog.win.team }}チームの勝利です！</div>
 			</div>
 			<div class="win">
-				<div style="clear:left;">
+				<div 
+				v-if="this.dialog.win.players != undefined"
+				style="clear:left;">
 					<div 
 					style="float:left; margin:10px; text-align:center;"
 					v-for="n in this.dialog.win.players.length" :key="n"
