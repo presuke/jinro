@@ -9,6 +9,8 @@ export default {
 		Footer,
 	},
 	data: () => ({
+		url: location.href,
+		rootPath: '',
 		authtoken: '',
 		isProcessing: false,
 		isUsingPower: false,
@@ -36,6 +38,7 @@ export default {
 		},
 		errors: [],
 		room:{
+			time: 0,
 			roles:[],
 		},
 		players:[],
@@ -110,14 +113,11 @@ export default {
 		ret:{}
 	}),
 	created() {
-		const segments = window.location.pathname.split('/');
-
-		this.const.docPath = window.location.origin;
-		for(let i=1; i<segments.length-2; i++){
-			this.const.docPath += '/' + segments[i];
+		if(this.url.indexOf('/play/') != -1){
+			this.rootPath = this.url.split('/play/')[0];
+			this.playerid = this.url.split('/play/')[1];
 		}
 
-		this.playerid = segments[segments.length - 1];
 		this.authtoken = localStorage.getItem(this.const.authTokenName);
 		if(this.authtoken == null)
 			this.authtoken = '';
@@ -203,7 +203,7 @@ export default {
 			//部屋の状況を取得
 			this.authtoken = localStorage.getItem(this.const.authTokenName);
 			axios
-			.get('../api/v1/play/getRoomStatus', {
+			.get(this.rootPath + '/api/v1/play/getRoomStatus', {
 				params: {
 					playerid: this.playerid,
 					authtoken: this.authtoken,
@@ -460,7 +460,7 @@ export default {
 			params.authtoken = this.authtoken;
 
 			axios
-			.post(this.const.docPath + '/api/v1/play/action', {
+			.post(this.rootPath + '/api/v1/play/action', {
 				params,
 			})
 			.then((response) => {
@@ -617,7 +617,7 @@ export default {
 			this.dialog.login.error = '';
 
 			axios
-			.post(this.const.docPath + '/api/v1/play/login', {
+			.post(this.this.rootPath + '/api/v1/play/login', {
 				playerid: this.playerid,
 				pass: this.dialog.login.pass,
 			})
@@ -696,7 +696,7 @@ export default {
 @import '../../scss/play.scss';
 </style>
 <template>
-	<div id="app" :style="{ backgroundImage: `url('../image/bg${this.room.time}.jpg')` }">
+	<div id="app" :style="{ backgroundImage: `url('${this.rootPath}/image/bg${this.room.time}.jpg')` }">
 		<header>
 			<Header></Header>
 		</header>
@@ -717,7 +717,7 @@ export default {
 				v-if="player.sex == ''"
 				class="player"
 				>
-					<img :src="'../image/avatar/random.png'"
+					<img :src="rootPath + '/image/avatar/random.png'"
 					style="width:50px; height:50px;border-radius:50%;"
 					/>
 					<div style="font-size:smaller;">
@@ -746,11 +746,11 @@ export default {
 					class="attacked"
 					:class="[player.attacked == 9 ? 'show' : 'hide', ]">
 						<img 
-						:src="'../image/attacked.png'" style="width:30px; height:30px;" />
+						:src="rootPath + '/image/attacked.png'" style="width:30px; height:30px;" />
 					</div>
 					<img 
 					class="icon"
-					:src="'../image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+					:src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
 					:class="[player.flgDead == 1 ? 'dead' : '', player.done == 1 ? 'done' : '']"
 					:style="{ boxShadow: [ isUsingPower ? `0px 5px 10px ${player.role.color}`: `` ]}"
 					/>
@@ -763,6 +763,33 @@ export default {
 				</div>
 			</div>
 			<br style="clear:both;" />
+		</div>
+
+		<!--勝敗表示-->
+		<div
+		v-bind:class="[this.dialog.win.show ? 'scaleShow' : 'scaleHide']"
+		style="margin:10px: padding:10px;"
+		>
+			<div style="font-size:3vw;">
+				<div>勝負あり！！</div>
+				<div>{{ this.dialog.win.team }}チームの勝利です！</div>
+			</div>
+			<div class="win">
+				<div style="clear:left;">
+					<div 
+					style="float:left; margin:10px; text-align:center;"
+					v-for="n in this.dialog.win.players.length" :key="n"
+					>
+						<img :src="rootPath + '/image/avatar/' + this.dialog.win.players[n-1].sex + '/icon' + this.dialog.win.players[n-1].img.toString().padStart( 2, '0') + '.png'"
+						class="icon"
+						:style="{ boxShadow: `0px 5px 10px ${this.dialog.win.players[n-1].role.color}` }"
+						/>
+						<div>
+							{{ this.dialog.win.players[n-1].name }}[{{ this.dialog.win.players[n-1].role.name }}]
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<br style="clear:left;" />
 		<div id="information">
@@ -923,7 +950,7 @@ export default {
 				</v-card-title>
 				<v-card-text class="jail">
 					{{ this.dialog.result.vote.player.name }}さんが投獄されました。
-					<img :src="'../image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
+					<img :src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
 					class="icon"
 					/>
 				</v-card-text>
@@ -959,7 +986,7 @@ export default {
 							style="float:left;text-align:center;"
 							v-for="player in this.dialog.result.action.attackedPlayers"
 							>
-								<img :src="'../image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+								<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
 								class="icon"
 								/>
 								<div>
@@ -976,7 +1003,7 @@ export default {
 							style="float:left;text-align:center;"
 							v-for="player in this.dialog.result.action.freedomPlayers"
 							>
-								<img :src="'../image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+								<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
 								class="icon"
 								/>
 								<div>
@@ -1026,7 +1053,7 @@ export default {
 					{{ this.dialog.predict.target.name }}さんは、{{ this.dialog.predict.target.role.name }}です。
 					<img 
 					style="width:100px; height:100px; border-radius: 50%;"
-					:src="'../image/avatar/' + this.dialog.predict.target.sex + '/icon' + this.dialog.predict.target.img.toString().padStart( 2, '0') + '.png'"
+					:src="rootPath + '/image/avatar/' + this.dialog.predict.target.sex + '/icon' + this.dialog.predict.target.img.toString().padStart( 2, '0') + '.png'"
 					/>
 				</v-card-text>
 				<v-card-actions>
@@ -1059,7 +1086,7 @@ export default {
 					{{ this.dialog.expose.target.name }}さんは、{{ this.dialog.expose.target.role.name }}です。
 					<img 
 					style="width:100px; height:100px; border-radius: 50%;"
-					:src="'../image/avatar/' + this.dialog.expose.target.sex + '/icon' + this.dialog.expose.target.img.toString().padStart( 2, '0') + '.png'"
+					:src="rootPath + '/image/avatar/' + this.dialog.expose.target.sex + '/icon' + this.dialog.expose.target.img.toString().padStart( 2, '0') + '.png'"
 					/>
 				</v-card-text>
 				<v-card-actions>
@@ -1106,7 +1133,7 @@ export default {
 						<h2>ソース</h2>
 						<div>
 							<img 
-							src="../../image/github-mark.svg" 
+							:src="rootPath + '/image/github-mark.svg'" 
 							class="icon" 
 							style="filter: drop-shadow(2px 2px 2px #66c);width:30px;height:30px;"
 							/>
@@ -1170,46 +1197,6 @@ export default {
 			</v-card>
 		</v-dialog>
 
-		<!--勝敗表示ダイアログ-->
-		<v-dialog
-		v-model="this.dialog.win.show"
-		transition="dialog-top-transition"
-		max-width="400"
-		class="dialog"
-		>
-			<v-card maxWidth="400" height="100vh">
-				<v-card-title>
-					結果
-				</v-card-title>
-				<v-card-text class="win">
-					{{ this.dialog.win.team }}チームの勝利です！
-					<div style="clear:left;">
-						<div 
-						style="float:left; margin:10px; text-align:center;"
-						v-for="n in this.dialog.win.players.length" :key="n"
-						>
-							<img :src="'../image/avatar/' + this.dialog.win.players[n-1].sex + '/icon' + this.dialog.win.players[n-1].img.toString().padStart( 2, '0') + '.png'"
-							class="icon"
-							:style="{ boxShadow: `0px 5px 10px ${this.dialog.win.players[n-1].role.color}` }"
-							/>
-							<div>
-								{{ this.dialog.win.players[n-1].name }}[{{ this.dialog.win.players[n-1].role.name }}]
-							</div>
-						</div>
-					</div>
-				</v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn
-					color="blue-darken-1"
-					variant="text"
-					@click="this.dialog.win.show = false;"
-					>
-						確認
-					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
 
 		<div id="controll">
 			<div v-if="this.me.flgDead == 1">

@@ -138,7 +138,7 @@ export default {
 				this.se.Error.play();
 			}else{
 				axios
-				.post(this.url + '/api/v1/player/create', this.form.player)
+				.post(this.rootPath + '/api/v1/player/create', this.form.player)
 				.then((response) => {
 					try {
 						if(response.data.player != undefined){
@@ -545,7 +545,7 @@ export default {
 						</v-card-title>
 						<v-card-text>
 							<img 
-								:src=" + rootPath + '/image/avatar/' + form.player.sex + '/icon0' + form.player.img + '.png'" 
+								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon0' + form.player.img + '.png'" 
 								class="rounded-circle"
 								/>
 							<div>

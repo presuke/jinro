@@ -65,6 +65,7 @@ class Action
           [
             'roomid' => $room->id,
             'playerid' => $me->id,
+            'targetid' => 0,
             'day' => $room->day,
             'time' => $room->time,
             'action' => $param['action'],

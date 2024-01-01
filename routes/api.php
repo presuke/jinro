@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\Room as RoomV1;
-use App\Http\Controllers\v1\Work as WorkV1;
 use App\Http\Controllers\v1\Player as PlayerV1;
 use App\Http\Controllers\v1\Play as PlayV1;
 
