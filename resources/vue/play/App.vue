@@ -750,7 +750,13 @@ export default {
 					<div 
 					v-if="isUsingPower"
 					class="roleShortName">
-						{{ player.role.ShortName }}
+						<span v-if="player != undefined">
+							<span v-if="player.role != undefined">
+								<span v-if="player.role.ShortName != undefined">
+									{{ player.role.ShortName }}
+								</span>
+							</span>
+						</span>
 					</div>
 					<div 
 					class="attacked"
