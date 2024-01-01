@@ -511,7 +511,7 @@ export default {
 								contain
 							>
 								<img 
-								:src="'../image/avatar/' + form.player.sex + '/icon0' + img + '.png'" 
+								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon0' + img + '.png'" 
 								class="rounded-circle"
 								/>
 							</v-carousel-item>
@@ -545,7 +545,7 @@ export default {
 						</v-card-title>
 						<v-card-text>
 							<img 
-								:src="'../image/avatar/' + form.player.sex + '/icon0' + form.player.img + '.png'" 
+								:src=" + rootPath + '/image/avatar/' + form.player.sex + '/icon0' + form.player.img + '.png'" 
 								class="rounded-circle"
 								/>
 							<div>
