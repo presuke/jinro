@@ -664,6 +664,7 @@ export default {
 		getRole(roleid){
 			let ret = undefined;
 			this.const.roles.forEach((role) => {
+				role.ShortName = '';
 				if(roleid == role.id){
 					switch(role.id){
 						case 0:
