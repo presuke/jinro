@@ -1323,11 +1323,13 @@ export default {
 				<!--昼-->
 				<v-row :class="[this.info.time==4 ? 'scaleShow': 'scaleHide']">
 					<v-col>
+						<!--
 						<v-btn
 						@click="this.dialog.win.show = true;"
 						>
 							勝敗結果確認
 						</v-btn>
+						-->
 					</v-col>
 				</v-row>
 				<div class="actionResult">
