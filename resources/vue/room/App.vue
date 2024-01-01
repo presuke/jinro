@@ -108,7 +108,7 @@ export default {
 				this.form.player = player;
 				this.form.player.step = 2;
 			}else{
-				location.href = '../play/' + player.id;
+				location.href = this.rootPath + '/play/' + player.id;
 			}
 		},
 		createPlayer(){
