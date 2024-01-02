@@ -173,7 +173,7 @@ class Scene
       $ret['acted'] = $acted->get();
       //生きてる人と行動済みの人を比べる
       if ($playerNum == $acted->count()) {
-        $timelimit = 30 - (strtotime(now()) - strtotime($acted->max('upd')));
+        $timelimit = 10 - (strtotime(now()) - strtotime($acted->max('upd')));
         if ($timelimit > 0) {
           //$ret['info']['message'] = $timelimit . '秒後に夜が明けます。結果は朝知ることになるでしょう・・・';
           $ret['info']['countdown']['sec'] = $timelimit;
