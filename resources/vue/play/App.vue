@@ -291,15 +291,19 @@ export default {
 							}
 							//役割ごとのアクション
 							case 2:{
-								const acted = response.data.acted;
-								for(let idx = 0; idx < this.players.length; idx++){
-									let player = this.players[idx];
-									acted.forEach((act) => {
-										if(act.playerid == player.id){
-											player.done = 1;
-										}
-									});
-									this.players[idx] = player;
+								try{
+									const acted = response.data.acted;
+									for(let idx = 0; idx < this.players.length; idx++){
+										let player = this.players[idx];
+										acted.forEach((act) => {
+											if(act.playerid == player.id){
+												player.done = 1;
+											}
+										});
+										this.players[idx] = player;
+									}
+								}catch(error){
+									console.log(error);
 								}
 								const message = 'あなたは' + this.me.role.name + 'です。さぁ、あなたがやるべきことをやってください。';
 								if(this.info == undefined){
