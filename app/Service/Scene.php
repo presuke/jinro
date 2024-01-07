@@ -134,7 +134,7 @@ class Scene
         if ($cntConfirmed < $cntLives) {
           $ret['info']['message'] = $cntLives . '人中' . ($cntLives - $cntConfirmed) . '人が投票結果を未確認です。もうちょっと待ちましょう。';
         } else {
-          DB::table('room')->where(['id' => $room->id])->update(['time' => 2]);
+          self::jadge($ret, $room);
         }
       }
     } catch (\Exception $ex) {
@@ -205,7 +205,7 @@ class Scene
                 }
               }
               foreach ($considers as $consider) {
-                if ($attack->targetid == $consider->targetid) {
+                if ($attack->targetid == $consider->playerid) {
                   $attack->targetid = 0;
                   $cntConsider++;
                 }
@@ -305,22 +305,7 @@ class Scene
         if (count($lstConfirm) < count($lstLive)) {
           $ret['info']['message'] = count($lstLive) . '人中' . (count($lstLive) - count($lstConfirm)) . '人が結果を未確認です。もうちょっと待ちましょう。';
         } else {
-          $players = DB::table('player')->select(
-            'id',
-            'roomid',
-            'name',
-            'sex',
-            'img',
-            'role',
-            'flgDead',
-          )->where(['roomid' => $room->id,])->orderBy('id')->get();
-
-          $time = Scene::jadge($players);
-          if ($time == 0) {
-            DB::table('room')->where(['id' => $room->id])->update(['time' => 0]);
-          } else if ($time > 0) {
-            DB::table('room')->where(['id' => $room->id])->update(['time' => 4]);
-          }
+          self::jadge($ret, $room);
         }
       }
     } catch (\Exception $ex) {
@@ -329,6 +314,58 @@ class Scene
     }
   }
 
+  private static function jadge(&$ret, $room)
+  {
+    try {
+      $players = DB::table('player')->select(
+        'id',
+        'roomid',
+        'name',
+        'sex',
+        'img',
+        'role',
+        'flgDead',
+      )->where(['roomid' => $room->id,])->orderBy('id')->get();
+
+      //残プレイヤーの構成を確認
+      $cntJinro = 0;
+      $cntTeamJinro = 0;
+      $cntTeamPeople = 0;
+      foreach ($players as $player) {
+        if ($player->flgDead == 0) {
+          if ($player->role == 1) {
+            $cntJinro++;
+          }
+          if ($player->role == 1 || $player->role == 5 || $player->role == 7) {
+            $cntTeamJinro++;
+          } else {
+            $cntTeamPeople++;
+          }
+        }
+      }
+
+      $win = 0;
+      if ($cntTeamJinro >= $cntTeamPeople) {
+        $win = 1;
+      } else if ($cntJinro == 0) {
+        $win = 2;
+      }
+
+      if ($win == 0) {
+        //決着がつかなければ時を進める
+        $timeNext = $room->time == 1 ? 2 : 0;
+        DB::table('room')->where(['id' => $room->id])->update(['time' => $timeNext]);
+      } else {
+        //決着がついたら昼にする
+        DB::table('room')->where(['id' => $room->id])->update(['time' => 4, 'win' => $win]);
+      }
+    } catch (\Exception $ex) {
+      $ret['code'] = 99;
+      $ret['error'] = $ex->getMessage();
+    }
+  }
+
+  /*
   public static function gameset(&$ret, $room, &$players)
   {
     try {
@@ -342,38 +379,12 @@ class Scene
         'flgDead',
       )->selectRaw('role as roleid')->where(['roomid' => $room->id,])->orderBy('id')->get();
 
-      $ret['win'] = self::jadge($players);
+      //勝敗
+      DB::table('room')->where(['id' => $room->id])->update(['win' => $ret['win']]);
     } catch (\Exception $ex) {
       $ret['code'] = 99;
       $ret['error'] = $ex->getMessage();
     }
   }
-
-  private static function jadge($players)
-  {
-    $ret = -1;
-    try {
-      $cntTeamJinro = 0;
-      $cntTeamPeople = 0;
-      foreach ($players as $player) {
-        if ($player->flgDead == 0) {
-          if ($player->role == 1 || $player->role == 5 || $player->role == 7) {
-            $cntTeamJinro++;
-          } else {
-            $cntTeamPeople++;
-          }
-        }
-      }
-      if ($cntTeamJinro >= $cntTeamPeople) {
-        $ret = 1;
-      } else if ($cntTeamJinro == 0) {
-        $ret = 2;
-      } else {
-        $ret = 0;
-      }
-    } catch (\Exception $ex) {
-      $ret = false;
-    }
-    return $ret;
-  }
+  */
 }

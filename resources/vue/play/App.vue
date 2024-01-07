@@ -36,7 +36,7 @@ export default {
 			message:'',
 			error:'',
 		},
-		errors: [],
+		error: '',
 		room:{
 			time: 0,
 			roles:[],
@@ -286,6 +286,8 @@ export default {
 											this.se.Jail.play();
 										}
 									}
+									//選択中プレイヤーのクリア
+									this.playerSelected = {};
 								}
 								break;
 							}
@@ -305,13 +307,15 @@ export default {
 								}catch(error){
 									console.log(error);
 								}
-								const message = 'あなたは' + this.me.role.name + 'です。さぁ、あなたがやるべきことをやってください。';
+								const message = (this.me.flgDead == 0) ? 
+												'あなたは' + this.me.role.name + 'です。さぁ、あなたがやるべきことをやってください。':
+												'';
 								if(this.info == undefined){
 									this.info.message = message;
 								}else if(this.info.countdown != undefined){
 									//行動終了までのカウントダウン
-									this.countdown.sec = response.info.countdown.sec;
-									this.countdown.action = response.info.countdown.action;
+									this.countdown.sec = response.data.info.countdown.sec;
+									this.countdown.action = response.data.info.countdown.action;
 									this.startCountDownTimer();
 								}else if(this.info.message == undefined){
 									this.info.message = message;
@@ -386,9 +390,14 @@ export default {
 											}
 										}
 									}
-									if(this.dialog.result.action.message.length == 0){
+									if(!flgAttacked &&
+									   !flgFreedom &&
+									   !flgSaved &&
+									   !flgChanged){
 										this.dialog.result.action.message.push('昨夜は何も起こりませんでした。');
 									}
+									//選択中プレイヤーのクリア
+									this.playerSelected = {};
 								}
 								break;
 							}
@@ -405,10 +414,10 @@ export default {
 										}
 									}
 								});
-								if(lstJinro.length == 0){
+								if(response.data.win == 2){
 									this.dialog.win.team = '村人';
 									this.dialog.win.players = lstPeaple;
-								}else if(lstJinro.length >= lstPeaple.length){
+								}else if(response.data.win == 1){
 									this.dialog.win.team = '人狼';
 									this.dialog.win.players = lstJinro;
 								}else{
@@ -426,7 +435,7 @@ export default {
 							}
 							//?
 							default:{
-								this.errors = JSON.stringify(response.data);
+								this.error = JSON.stringify(response.data);
 								break;
 							}
 						}
@@ -441,13 +450,13 @@ export default {
 					}else if(response.data.room  != undefined){
 						this.rooms = response.data.room;
 					}else if(response.data.errors.length > 0){
-						this.errors = response.data.errors;
-						console.log(this.errors);
+						this.error = JSON.stringfy(response.data.errors);
+						console.log(this.error);
 					}else{
-						this.errors.push('特定できないエラー');
+						this.error = '特定できないエラーが発生しました。';
 					}
 				} catch (e) {
-					this.errors = e;
+					this.error = e;
 				}
 			})
 			.catch((err) => {
@@ -524,7 +533,7 @@ export default {
 						}
 					}
 				} catch (e) {
-					this.errors = e;
+					this.error = e;
 				}
 			})
 			.catch((err) => {
@@ -558,7 +567,7 @@ export default {
 							return false;
 						}
 					}else if(this.action.message.indexOf('検討') != -1){
-						if(!confirm('確認', '検討をキャンセルして就寝しますか？')){
+						if(!confirm('検討をキャンセルして就寝しますか？')){
 							return false;
 						}
 					}
@@ -648,17 +657,18 @@ export default {
 						this.dialog.login.show = false;
 						this.refleshStatus();
 						this.se.Success.play();
+						this.dialog.myCard.show = true;
 					}
 					else if(response.data.error != undefined){
 						this.dialog.login.show = true;
 						this.dialog.login.error = response.data.error;
 						this.se.Error.play();
 					}else{
-						this.errors.push('特定できないエラー');
+						this.error = '特定できないエラーが発生しました。';
 						this.se.Error.play();
 					}
 				} catch (e) {
-					this.errors = e;
+					this.error = e;
 				}
 			})
 			.catch((err) => {
@@ -673,19 +683,7 @@ export default {
 		getRole(roleid){
 			let ret = undefined;
 			this.const.roles.forEach((role) => {
-				role.ShortName = '';
 				if(roleid == role.id){
-					switch(role.id){
-						case 0:
-						case 1:{
-							role.ShortName = role.name.substring(1,2);
-							break;
-						}
-						default:{
-							role.ShortName = role.name.substring(0,1);
-							break;
-						}
-					}
 					ret = role;
 				}
 			});
@@ -695,6 +693,11 @@ export default {
 			if(this.me.id == player.id) { 
 				if(this.me.role.power){
 					this.isUsingPower = !this.isUsingPower; 
+				}else{
+					this.error = '他のプレイヤーを見破る力を持っていません。';
+					setTimeout(()=>{
+						this.error = '';
+					},2000);
 				}
 				this.playerSelected ={}; 
 			}else{ 
@@ -771,9 +774,7 @@ export default {
 					class="roleShortName">
 						<span v-if="player != undefined">
 							<span v-if="player.role != undefined">
-								<span v-if="player.role.ShortName != undefined">
-									{{ player.role.ShortName }}
-								</span>
+								{{ player.role.shortName }}
 							</span>
 						</span>
 					</div>
@@ -1086,11 +1087,13 @@ export default {
 				<v-card-text 
 				style="background-size: contain; background-position: center; text-shadow: 0 0 5px black;"
 				:style="{ backgroundImage: `url('${this.dialog.predict.target.role.img}')` }">
+					<div>
+						<img 
+						style="width:100px; height:100px; border-radius: 50%;"
+						:src="rootPath + '/image/avatar/' + this.dialog.predict.target.sex + '/icon' + this.dialog.predict.target.img.toString().padStart( 2, '0') + '.png'"
+						/>
+					</div>
 					{{ this.dialog.predict.target.name }}さんは、{{ this.dialog.predict.target.role.name }}です。
-					<img 
-					style="width:100px; height:100px; border-radius: 50%;"
-					:src="rootPath + '/image/avatar/' + this.dialog.predict.target.sex + '/icon' + this.dialog.predict.target.img.toString().padStart( 2, '0') + '.png'"
-					/>
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
@@ -1119,11 +1122,13 @@ export default {
 				<v-card-text 
 				style="background-size: contain; background-position: center; text-shadow: 0 0 5px black;"
 				:style="{ backgroundImage: `url('${this.dialog.expose.target.role.img}')` }">
-					{{ this.dialog.expose.target.name }}さんは、{{ this.dialog.expose.target.role.name }}です。
+				<div>
 					<img 
 					style="width:100px; height:100px; border-radius: 50%;"
 					:src="rootPath + '/image/avatar/' + this.dialog.expose.target.sex + '/icon' + this.dialog.expose.target.img.toString().padStart( 2, '0') + '.png'"
 					/>
+				</div>
+					{{ this.dialog.expose.target.name }}さんは、{{ this.dialog.expose.target.role.name }}です。
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
@@ -1344,6 +1349,9 @@ export default {
 						{{ this.action.error }}
 					</div>
 				</div>
+			</div>
+			<div class="error">
+				{{ this.error }}
 			</div>
 		</div>
 		<footer @click="this.dialog.copyright.show = true;">

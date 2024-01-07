@@ -197,8 +197,13 @@ class Play extends BaseController
                         )->where(['roomid' => $me->roomid,])->orderBy('id');
                         //神様と人狼・裏切者以外は情報を伏せる
                         if ($me->roleid == 6) {
+                            //神は全員の役割を把握する
                             $players = $query->selectRaw('role as roleid')->get();
-                        } else if ($me->roleid == 1 || $me->roleid == 5) {
+                        } else if ($me->roleid == 1) {
+                            //人狼は人狼と裏切者と吸血鬼の役割を把握する
+                            $players = $query->selectRaw("(CASE role WHEN 1 THEN 1 WHEN 5 THEN 5 WHEN 7 THEN 7 ELSE 0 END) AS roleid")->get();
+                        } else if ($me->roleid == 5) {
+                            //裏切者は人狼と裏切者の役割を把握する
                             $players = $query->selectRaw("(CASE role WHEN 1 THEN 1 WHEN 5 THEN 5 ELSE 0 END) AS roleid")->get();
                         } else {
                             $players = $query->get();
@@ -240,7 +245,17 @@ class Play extends BaseController
                                 }
                                 //勝敗
                             case 4: {
-                                    Scene::gameset($ret, $room, $players);
+                                    //Scene::gameset($ret, $room, $players);
+                                    $players = DB::table('player')->select(
+                                        'id',
+                                        'roomid',
+                                        'name',
+                                        'sex',
+                                        'img',
+                                        'flgDead',
+                                        'flgDead as attacked',
+                                    )->selectRaw('role as roleid')->where(['roomid' => $room->id])->get();
+                                    $ret['win'] = $room->win;
                                     break;
                                 }
                         }

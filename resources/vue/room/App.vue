@@ -203,6 +203,51 @@ export default {
 				this.se.Error.play();
 			});
 		},
+		restart(room){
+			if(!confirm("部屋「" + room.room.name + "」でカードを配り直して再プレイしますか？")){
+				return false;
+			}
+			axios
+			.post(this.rootPath + '/api/v1/room/restart', {
+				params: room.room,
+			})
+			.then((response) => {
+				if(response.data.code == 0){
+					this.se.Success.play();
+					this.loadRooms();
+				}else{
+					this.form.room.error = response.data.error;
+					this.se.Error.play();
+				}
+			})
+			.catch((err) => {
+				this.form.room.error = err.message;
+				this.se.Error.play();
+			});
+		},
+		removeRoom(room){
+			if(!confirm("部屋「" + room.room.name + "」を削除しますか？")){
+				return false;
+			}
+			axios
+			.post(this.rootPath + '/api/v1/room/remove', {
+				params: room.room,
+			})
+			.then((response) => {
+				if(response.data.code == 0){
+					this.se.Success.play();
+					this.loadRooms();
+				}else{
+					this.form.room.error = response.data.error;
+					this.se.Error.play();
+				}
+			})
+			.catch((err) => {
+				this.form.room.error = err.message;
+				this.form.room.step = 2;
+				this.se.Error.play();
+			});
+		},
 		showDescription(role){
 			this.form.room.role.name = role.name;
 			this.form.room.role.description = role.description;
@@ -361,10 +406,16 @@ export default {
 								border-bottom: solid thin gray;
 							"
 						>
-							<div style="float: left">
+							<div style="float: left; width:calc(100% - 200px);">
 								{{ room.room.name }}
 							</div>
-							<div style="float: right;">
+							<div style="float: left">
+								{{ room.players.length }}名
+							</div>
+							<div 
+							v-if="room.room.win == 0"
+							style="float: right;"
+							>
 								<span
 								v-if="this.form.player.roomid == room.room.id"
 								class="inRoom"
@@ -376,6 +427,21 @@ export default {
 								v-else @click="entryRoom(room)"
 								>
 									入室
+								</v-btn>
+							</div>
+							<div v-else
+							style="float: right;">
+								<v-btn
+								color="purple darken-4"
+								@click="restart(room)"
+								>
+									replay
+								</v-btn>
+								<v-btn
+								color="purple darken-4"
+								@click="removeRoom(room)"
+								>
+									削除
 								</v-btn>
 							</div>
 							<br style="clear: left" />

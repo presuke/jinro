@@ -21,6 +21,8 @@ Route::prefix('/v1')->group(function () {
     Route::prefix('/room')->group(function () {
         Route::get('getAll', [RoomV1::Class, 'getAll']);
         Route::post('create', [RoomV1::Class, 'create']);
+        Route::post('remove', [RoomV1::Class, 'remove']);
+        Route::post('restart', [RoomV1::Class, 'restart']);
     });
     Route::prefix('/player')->group(function () {
         Route::post('create', [PlayerV1::Class, 'create']);

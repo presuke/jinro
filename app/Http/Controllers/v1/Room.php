@@ -111,6 +111,78 @@ class Room extends BaseController
         return response()->json($ret);
     }
 
+    public function remove(Request $request)
+    {
+        try {
+            $ret = [];
+            $params = $request->all();
+
+            DB::beginTransaction();
+            try {
+
+                $params = $params['params'];
+
+                $roomId = $params['id'];
+
+                $histories = DB::table('history')->where(['roomid' => $roomId]);
+                $histories->delete();
+
+                $players = DB::table('player')->where(['roomid' => $roomId]);
+                $players->delete();
+
+                $room = DB::table('room')->where(['id' => $roomId])->first();
+                $room->delete();
+
+                $ret['code'] = 0;
+            } catch (\Exception $e) {
+                $ret['code'] = 9;
+                $ret['error'] = $e->getMessage();
+                DB::rollback();
+            }
+        } catch (\Exception $ex) {
+            $ret['code'] = 9;
+            $ret['error'] = $e->getMessage();
+        }
+        return response()->json($ret);
+    }
+
+    public function restart(Request $request)
+    {
+        try {
+            $ret = [];
+            $params = $request->all();
+
+            DB::beginTransaction();
+            try {
+
+                $params = $params['params'];
+
+                $roomId = $params['id'];
+
+                $histories = DB::table('history')->where(['roomid' => $roomId]);
+                $histories->delete();
+
+                DB::table('room')->where(['id' => $roomId])->update(['day' => 1, 'time' => 0, 'win' => 0]);
+
+                $ret = $this->shuffleCard($roomId);
+                if ($ret['code'] == 0) {
+                    DB::commit();
+                    $ret['code'] = 0;
+                } else {
+                    DB::rollback();
+                    $ret['code'] = 9;
+                    $ret['error'] = 'debug';
+                }
+            } catch (\Exception $e) {
+                $ret['code'] = 9;
+                $ret['error'] = $e->getMessage();
+                DB::rollback();
+            }
+        } catch (\Exception $ex) {
+        }
+        return response()->json($ret);
+    }
+
     public function shuffleCard($roomId)
     {
         $ret = [];
@@ -136,7 +208,7 @@ class Room extends BaseController
                 DB::table('player')->where([
                     'id' => $player->id,
                     'roomid' => $roomId,
-                ])->update(['role' => $cards[$cardNo]]);
+                ])->update(['flgDead' => 0, 'role' => $cards[$cardNo]]);
                 $cardNo++;
             }
 

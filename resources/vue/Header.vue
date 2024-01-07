@@ -1,10 +1,36 @@
-<template>
-    <x-sign id="title">人狼</x-sign>
+<script>
+import logo from '../image/logo.png';
 
+export default {
+    data: function () {
+        return {
+            logo: logo
+        }
+    }
+}
+</script>
+<template>
+    <div class="logo">
+        <img :src="logo" />
+    </div>
+    <x-sign id="title">
+        人狼
+    </x-sign>
 </template>
 <style>
     #title {
-        background-color:darkmagenta;
+        background-color:#333;
+    }
+    .logo {
+        position:absolute;
+        top:5;
+        left:5;
+        z-index:1;
+    }
+    .logo img{
+        width:80px; 
+        height:80px;
+        filter: drop-shadow(0px 0px 15px red);
     }
 
     x-sign {

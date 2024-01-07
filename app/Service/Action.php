@@ -90,7 +90,6 @@ class Action
       $myAction = [
         'roomid' => $room->id,
         'playerid' => $me->id,
-        'targetid' => 0,
         'day' => $room->day,
         'time' => $room->time,
       ];
@@ -99,8 +98,13 @@ class Action
       $action = DB::table('history')->where($myAction);
       if ($action->count() == 0) {
         $myAction['action'] = $actionName;
+        $myAction['targetid'] = 0;
         DB::beginTransaction();
         DB::table('history')->insert($myAction);
+        DB::commit();
+      } else {
+        DB::beginTransaction();
+        $action->update(['action' => $actionName, 'targetid' => 0]);
         DB::commit();
       }
       $ret['message'] = '就寝しました。';
@@ -121,6 +125,13 @@ class Action
         $ret['error'] = 'あなたは人狼ではありません。';
         return $ret;
       }
+
+      $target =  DB::table('player')->where(['id' => $targetid])->first();
+      if ($target->flgDead != 0) {
+        $ret['error'] = '投獄中のプレイヤーを襲撃することはできません。';
+        return $ret;
+      }
+
 
       $myAction = [
         'roomid' => $room->id,
@@ -382,7 +393,6 @@ class Action
       $myAction = [
         'roomid' => $room->id,
         'playerid' => $me->id,
-        'targetid' => $targetid,
         'day' => $room->day,
         'time' => $room->time,
       ];
@@ -391,6 +401,7 @@ class Action
       DB::beginTransaction();
       if ($action->count() == 0) {
         $myAction['action'] = $actionName;
+        $myAction['targetid'] = $targetid;
         DB::table('history')->insert($myAction);
       } else {
         $action->update(['action' => $actionName, 'targetid' => $targetid]);
@@ -412,6 +423,7 @@ class Action
       $myAction = [
         'roomid' => $room->id,
         'playerid' => $me->id,
+        'targetid' => 0,
         'day' => $room->day,
         'time' => $room->time,
       ];
@@ -433,7 +445,7 @@ class Action
         $myAction['action'] = $actionName;
         DB::table('history')->insert($myAction);
       } else {
-        $action->update(['action' => $actionName, 'targetid' => $targetid]);
+        $action->update(['action' => $actionName]);
       }
       DB::commit();
       $ret['message'] = '検討しました。';
