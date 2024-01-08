@@ -110,7 +110,7 @@ class Room extends BaseController
                 $ret['error'] = $e->getMessage();
                 DB::rollback();
             }
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             $ret['code'] = 99;
             $ret['error'] = $e->getMessage();
         }
