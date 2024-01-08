@@ -27,15 +27,8 @@ Route::get('/play/{any?}', function () {
     '.*'
 );
 
-Route::get('/welcome', function () {
-    return view('welcome');
-})->where(
-    'any',
-    '.*'
-);
-
 Route::get('/', function () {
-    return view('index');
+    return view('welcome');
 })->where(
     'any',
     '.*'
