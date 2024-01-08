@@ -59,6 +59,7 @@ class Room extends BaseController
             $ret = [];
             $params = $request->all();
 
+            $ret['step'] = 1;
             DB::beginTransaction();
             try {
 
@@ -72,6 +73,7 @@ class Room extends BaseController
                 }
 
                 //部屋作成
+                $ret['step'] = 2;
                 $roles = [];
                 foreach ($params['roles'] as $roleId => $role) {
                     $roles[$roleId]['id'] = $role['id'];
@@ -81,6 +83,7 @@ class Room extends BaseController
                 $roomId = DB::table('room')->insertGetId(['name' => $params['name'], 'roles' => json_encode($roles, JSON_UNESCAPED_UNICODE),]);
 
                 //プレイヤー作成
+                $ret['step'] = 3;
                 foreach ($roles as $roleId => $role) {
                     for ($i = 0; $i < $role['num']; $i++) {
                         DB::table('player')->insert([
@@ -89,12 +92,13 @@ class Room extends BaseController
                     }
                 }
 
+                $ret['step'] = 4;
                 $ret = $this->shuffleCard($roomId);
+                $ret['step'] = 5;
                 if ($ret['code'] == 0) {
                     DB::commit();
                     $ret['code'] = 0;
                     $ret['roomName'] = $params['name'];
-                    $ret['error'] = 'debug';
                 } else {
                     DB::rollback();
                     $ret['code'] = 0;
@@ -107,6 +111,8 @@ class Room extends BaseController
                 DB::rollback();
             }
         } catch (\Exception $ex) {
+            $ret['code'] = 99;
+            $ret['error'] = $e->getMessage();
         }
         return response()->json($ret);
     }
