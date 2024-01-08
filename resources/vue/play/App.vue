@@ -435,7 +435,7 @@ export default {
 							}
 							//?
 							default:{
-								if(response.data.errors.length > 0){
+								if(response.data.errors != undefined){
 									this.error = JSON.stringfy(response.data.errors);
 								}
 								//this.error = JSON.stringify(response.data);
