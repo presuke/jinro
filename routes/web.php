@@ -29,7 +29,4 @@ Route::get('/play/{any?}', function () {
 
 Route::get('/', function () {
     return view('welcome');
-})->where(
-    'any',
-    '.*'
-);
+});
