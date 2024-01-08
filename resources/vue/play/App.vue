@@ -435,7 +435,10 @@ export default {
 							}
 							//?
 							default:{
-								this.error = JSON.stringify(response.data);
+								if(response.data.errors.length > 0){
+									this.error = JSON.stringfy(response.data.errors);
+								}
+								//this.error = JSON.stringify(response.data);
 								break;
 							}
 						}
