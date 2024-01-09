@@ -27,6 +27,13 @@ Route::get('/play/{any?}', function () {
     '.*'
 );
 
+Route::get('/top', function () {
+    return view('welcome');
+})->where(
+    'any',
+    '.*'
+);
+
 Route::get('/', function () {
-    return view('test');
+    return redirect('/room');
 });
