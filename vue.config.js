@@ -1,4 +1,8 @@
 module.exports = {
-  outputDir:'../public/webview', // ファイルの出力先ルート
-  publicPath: './webview'
+  pages: {
+    index: {
+      entry: "src/main.js",
+      title: "ああああ"
+    }
+  }
 }
