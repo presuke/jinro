@@ -109,7 +109,7 @@ class Room extends BaseController
                     $roles[$roleId]['name'] = $role['name'];
                     $roles[$roleId]['num'] = $role['num'];
                 }
-                $key = time() . microtime(true);
+                $key = microtime(true);
                 $roomId = DB::table('room')->insertGetId(['name' => $params['name'], 'key' => $key, 'roles' => json_encode($roles, JSON_UNESCAPED_UNICODE),]);
 
                 //プレイヤー作成
