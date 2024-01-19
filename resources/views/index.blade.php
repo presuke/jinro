@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>部屋作成</title>
+  <title>人狼</title>
   @vite(['resources/css/app.css', 'resources/js/index/app.js'])
   <link href="//fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="//cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
 
 <body>
   <div style="text-align:center;">
-    <div id="app" style="max-width:800px; margin: 0 auto;"></div>
+    <div id="app" style="max-width:800px; margin: 0 auto; background-color: black;"></div>
   </div>
 </body>
 

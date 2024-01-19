@@ -1,15 +1,15 @@
 import BtnAdd from '../image/control/circle-add.svg';
 import BtnRemove from '../image/control/circle-remove.svg';
-import ImgC0 from '../image/c0.jpg';
-import ImgC1 from '../image/c1.jpg';
-import ImgC2 from '../image/c2.jpg';
-import ImgC3 from '../image/c3.jpg';
-import ImgC4 from '../image/c4.jpg';
-import ImgC5 from '../image/c5.jpg';
-import ImgC6 from '../image/c6.jpg';
-import ImgC7 from '../image/c7.jpg';
-import ImgC8 from '../image/c8.jpg';
-import ImgC9 from '../image/c9.jpg';
+import ImgC0 from '../image/role/0.png';
+import ImgC1 from '../image/role/1.png';
+import ImgC2 from '../image/role/2.png';
+import ImgC3 from '../image/role/3.png';
+import ImgC4 from '../image/role/4.png';
+import ImgC5 from '../image/role/5.png';
+import ImgC6 from '../image/role/6.png';
+import ImgC7 from '../image/role/7.png';
+import ImgC8 from '../image/role/8.png';
+import ImgC9 from '../image/role/9.png';
 import SePush from '../se/push.mp3';
 import SeSuccess from '../se/success.mp3';
 import SeError from '../se/error.mp3';
@@ -38,7 +38,7 @@ export default {
                 id: 1,
                 name:'人狼',
                 shortName:'狼',
-                description:'襲撃対象を投獄することができます。別の人狼が襲撃したとき、誰が襲撃されたか知ることができます。（狩人に守られると襲撃が失敗します。）常に、人狼と裏切り者と吸血鬼のプレイヤーを把握できます。',
+                description:'襲撃対象を投獄することができます。（狩人に守られると襲撃が失敗します。）別の人狼が襲撃したプレイヤーを知ることができます。常に、人狼と裏切り者と吸血鬼のプレイヤーを把握できます。',
                 img: ImgC1,
                 color: 'red',
                 num: 0,
@@ -62,7 +62,7 @@ export default {
                 shortName:'占',
                 description:'指定したキャラクターの正体を見破ることができます。ただし、裏切り者を占うと村人だと判定してしまいます。',
                 img: ImgC3,
-                color: 'cyan',
+                color: 'magenta',
                 num: 0,
                 power: false,
                 command:[]
@@ -73,7 +73,7 @@ export default {
                 shortName:'霊',
                 description:'投票で投獄されたキャラクターの正体を見破ることができます。',
                 img: ImgC4,
-                color: 'magenta',
+                color: 'cyan',
                 num: 0,
                 power: false,
                 command:[]
@@ -91,8 +91,8 @@ export default {
             },
             {
                 id: 6,
-                name:'神',
-                shortName:'神',
+                name:'皇帝',
+                shortName:'帝',
                 description:'常に、全てのキャラクターの正体を把握することができます。',
                 img: ImgC6,
                 color: 'gold',
@@ -115,9 +115,9 @@ export default {
                 id: 8,
                 name:'増税眼鏡',
                 shortName:'税',
-                description:'検討すると50％の確率で声を出してしまいます。また50％の確率で国会へ逃げ込んで人狼の襲撃から保身します。',
+                description:'検討すると50％の確率で人狼の襲撃から保身しますが、声を出してしまうことがあります。',
                 img: ImgC8,
-                color: 'darkyellow',
+                color: 'darkblue',
                 num: 0,
                 power: false,
                 command:[]

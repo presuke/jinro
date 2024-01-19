@@ -7,6 +7,7 @@
   @vite(['resources/css/app.css', 'resources/js/play/app.js'])
   <style>
     body {
+      background-color: #111;
       overflow-y: hidden;
     }
 

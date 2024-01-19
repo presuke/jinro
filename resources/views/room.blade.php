@@ -13,8 +13,8 @@
 </head>
 
 <body>
-  <div style="text-align:center;">
-    <div id="app" style="max-width:800px; margin: 0 auto;"></div>
+  <div style="text-align:center; height:100vh;">
+    <div id="app" style="max-width:800px; height:100%; margin: 0 auto;"></div>
   </div>
 </body>
 

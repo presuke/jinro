@@ -1,10 +1,12 @@
 <script>
+import CopyRight from '../CopyRight.vue';
 import Header from '../Header.vue';
 import Footer from '../Footer.vue';
 import Const from '../../js/const.js';
 
 export default {
 	components: {
+		CopyRight,
 		Header,
 		Footer,
 	},
@@ -56,6 +58,7 @@ export default {
 			timer: '',
 			count: 0,
 			countValue: 40,
+			total: 0,
 			message: '',
 		},
 		countdown:{
@@ -101,6 +104,8 @@ export default {
 			},
 			roomInfo:{
 				show: false,
+				description: 'test',
+				defaultdescription: 'カードをタップすると説明が表示されます。',
 			},
 			myCard:{
 				show: false,
@@ -121,6 +126,8 @@ export default {
 		this.authtoken = localStorage.getItem(this.const.authTokenName);
 		if(this.authtoken == null)
 			this.authtoken = '';
+
+		this.dialog.roomInfo.description = this.dialog.roomInfo.defaultdescription;
 
 		//役割ごとのコマンドを設定
 		this.const.roles.forEach((role) => {
@@ -218,7 +225,9 @@ export default {
 							this.const.roles.forEach((role) => {
 								if(role.id == this.room.roles[i].id){
 									this.room.roles[i].img = role.img;
+									this.room.roles[i].name = role.name;
 									this.room.roles[i].color = role.color;
+									this.room.roles[i].description = role.description;
 								}
 							});
 						}
@@ -233,6 +242,12 @@ export default {
 						this.players.forEach((player) => {
 							player.role = this.getRole(player.roleid);
 						});
+						//初回パワー有効
+						if(this.reflesh.total == 0){
+							if(this.me.role.power){
+								this.isUsingPower = true;
+							}
+						}
 
 						//時間帯による処理
 						switch(this.info.time){
@@ -442,6 +457,8 @@ export default {
 								break;
 							}
 						}
+
+						this.reflesh.total++;
 					}else if(response.data.code == 7){
 						//名無しエラー
 						this.problem = this.const.problems.namelessOtherPlayer;
@@ -731,7 +748,10 @@ export default {
 @import '../../scss/play.scss';
 </style>
 <template>
-	<div id="app" :style="{ backgroundImage: `url('${this.rootPath}/image/bg${this.room.time}.jpg')` }">
+	<div 
+	id="app" 
+	style="background-size: cover;"
+	:style="{ backgroundImage: `url('${this.rootPath}/image/bg${this.room.time}.jpg')` }">
 		<header>
 			<Header></Header>
 		</header>
@@ -902,7 +922,7 @@ export default {
 		max-width="400"
 		class="dialog"
 		>
-			<v-card width="320" height="400">
+			<v-card width="320" height="700">
 				<v-card-title>
 					{{ this.room.name }}
 				</v-card-title>
@@ -915,6 +935,7 @@ export default {
 							<div 
 							class="role"
 							:style="{ backgroundImage: `url('${role.img}')` }"
+							@click="this.dialog.roomInfo.description = role.description"
 							>
 								<div class="num">
 									{{ role.num }}
@@ -926,13 +947,16 @@ export default {
 						</div>
 						<br style="clear:both;" />
 					</div>
+					<div style="border:solid thin darkgray; border-radius: 5px; padding:5px; font-size:smaller;">
+						{{ this.dialog.roomInfo.description }}
+					</div>
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn
 					color="blue-darken-1"
 					variant="text"
-					@click="this.dialog.roomInfo.show = false;"
+					@click="this.dialog.roomInfo.show = false; this.dialog.roomInfo.description = this.dialog.roomInfo.defaultdescription"
 					>
 						閉じる
 					</v-btn>
@@ -1155,40 +1179,7 @@ export default {
 		>
 			<v-card maxWidth="400" height="400">
 				<v-card-text style="overflow-y: auto;">
-					<div style="font-size:smaller;">
-						<h2>素材提供</h2>
-						<ul style="margin-left:20px;">
-							<li>
-								<a href="https://blog.goo.ne.jp/akarise" target="_blank">ゆうひな様</a>
-							</li>
-							<li>
-								効果音：<a href="https://soundeffect-lab.info/" target="_blank">効果音ラボ様</a>
-							</li>
-							<li>
-								画像生成AI：<a href="https://www.bing.com/images/create?FORM=GDPCLS" target="_blank">Bing Image Creator</a>
-							</li>
-							<li>
-								画像編集ツール：<a href="https://www.befunky.com/create/photo-to-art/" target="_blank">Photo Editor</a>
-							</li>
-						</ul>
-						<div style="font-size:smaller;">
-							※素敵な素材、ツールのご提供に、感謝して使わせていただいております。
-						</div>
-						<h2>ソース</h2>
-						<div>
-							<img 
-							:src="rootPath + '/image/github-mark.svg'" 
-							class="icon" 
-							style="filter: drop-shadow(2px 2px 2px #66c);width:30px;height:30px;"
-							/>
-							<a href="https://github.com/renoneve/jinro" target="_blank">
-								https://github.com/renoneve/jinro
-							</a>
-							<div style="font-size:smaller;">
-								※vue+laravel勉強目的で作成したものです。非効率な記述や細かな不具合などあるかもしれません。
-							</div>
-						</div>
-					</div>
+					<CopyRight></CopyRight>
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>

@@ -364,27 +364,4 @@ class Scene
       $ret['error'] = $ex->getMessage();
     }
   }
-
-  /*
-  public static function gameset(&$ret, $room, &$players)
-  {
-    try {
-      //自ルームのプレイヤー
-      $players = DB::table('player')->select(
-        'id',
-        'roomid',
-        'name',
-        'sex',
-        'img',
-        'flgDead',
-      )->selectRaw('role as roleid')->where(['roomid' => $room->id,])->orderBy('id')->get();
-
-      //勝敗
-      DB::table('room')->where(['id' => $room->id])->update(['win' => $ret['win']]);
-    } catch (\Exception $ex) {
-      $ret['code'] = 99;
-      $ret['error'] = $ex->getMessage();
-    }
-  }
-  */
 }

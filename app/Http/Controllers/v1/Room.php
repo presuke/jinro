@@ -47,6 +47,37 @@ class Room extends BaseController
         return response()->json($ret);
     }
 
+    public function get(Request $request)
+    {
+        try {
+            $ret = [];
+            try {
+                $params = $request->all();
+
+                $room = DB::table('room')->where(['key' => $params['key']])->first();
+
+                if ($room == null) {
+                    $ret['code'] = 9;
+                    $ret['error'] = '指定の部屋は存在しません。';
+                } else {
+                    $res = [];
+                    $res['room'] = $room;
+                    $res['players'] = [];
+                    $players = DB::table('player')->select('id', 'roomid', 'name', 'sex', 'img')->where(['roomid' => $room->id])->get();
+                    foreach ($players as $player) {
+                        $res['players'][] = $player;
+                    }
+                    $ret['room'] = $res;
+                }
+            } catch (\Exception $e) {
+                $ret['code'] = 9;
+                $ret['error'] = $e;
+            }
+        } catch (Exception $ex) {
+        }
+        return response()->json($ret);
+    }
+
     /**
      * メンバー作成.
      *
@@ -59,7 +90,6 @@ class Room extends BaseController
             $ret = [];
             $params = $request->all();
 
-            $ret['step'] = 1;
             DB::beginTransaction();
             try {
 
@@ -73,17 +103,16 @@ class Room extends BaseController
                 }
 
                 //部屋作成
-                $ret['step'] = 2;
                 $roles = [];
                 foreach ($params['roles'] as $roleId => $role) {
                     $roles[$roleId]['id'] = $role['id'];
                     $roles[$roleId]['name'] = $role['name'];
                     $roles[$roleId]['num'] = $role['num'];
                 }
-                $roomId = DB::table('room')->insertGetId(['name' => $params['name'], 'roles' => json_encode($roles, JSON_UNESCAPED_UNICODE),]);
+                $key = time() . microtime(true);
+                $roomId = DB::table('room')->insertGetId(['name' => $params['name'], 'key' => $key, 'roles' => json_encode($roles, JSON_UNESCAPED_UNICODE),]);
 
                 //プレイヤー作成
-                $ret['step'] = 3;
                 foreach ($roles as $roleId => $role) {
                     for ($i = 0; $i < $role['num']; $i++) {
                         DB::table('player')->insert([
@@ -92,13 +121,13 @@ class Room extends BaseController
                     }
                 }
 
-                $ret['step'] = 4;
                 $ret = $this->shuffleCard($roomId);
-                $ret['step'] = 5;
                 if ($ret['code'] == 0) {
                     DB::commit();
                     $ret['code'] = 0;
                     $ret['roomName'] = $params['name'];
+                    $room = DB::table('room')->where(['id' => $roomId])->first();
+                    $ret['room'] = $room;
                 } else {
                     DB::rollback();
                     $ret['code'] = 0;

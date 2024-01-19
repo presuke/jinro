@@ -1,12 +1,14 @@
 <script>
 import axios from 'axios';
 import VueQrcode from '@chenfengyuan/vue-qrcode';
+import CopyRight from '../CopyRight.vue';
 import Header from '../Header.vue';
 import Footer from '../Footer.vue';
 import Const from '../../js/const.js';
 
 export default {
 	components: {
+		CopyRight,
 		Header,
 		Footer,
 		VueQrcode,
@@ -14,10 +16,11 @@ export default {
 	data: () => ({
 		url: location.href,
 		rootPath: '',
-		isLoading: true,
+		isLoading: false,
 		rooms: [],
+		room:{},
 		playersOnRoom: [],
-		errors: [],
+		error: '',
 		form: {
 			selection: {
 				sex: ['male', 'fmale'],
@@ -40,6 +43,8 @@ export default {
 					btnRemove: Const.data.btnRemove,
 				},
 				name: '',
+				key: '',
+				url:'',
 				roles:Const.data.roles,
 				role: {
 					name: '',
@@ -49,13 +54,22 @@ export default {
 				error: '',
 			}, //カンマを追加
 		},
+		dialog:{
+			copyright: {
+				show: false,
+			},
+		},
 		se: Const.data.se,
 	}),
 	created: function () {
 		if(this.url.indexOf('/room') != -1){
 			this.rootPath = this.url.split('/room')[0];
+			let key = this.url.split('/room')[1];
+			if(key.indexOf('/') != -1 && key != '/'){
+				this.form.room.key = key.split('/')[1];
+				this.loadRoom();
+			}
 		}
-		this.loadRooms();
 	},
 	mounted() {
 		window.onload = () => {
@@ -67,28 +81,65 @@ export default {
 			this.isLoading = true;
 			this.form.player.step = 0;
 			this.form.player.roomid = 0;
-			this.errors = [];
+			this.error = '';
 			axios
 				.get(this.rootPath + '/api/v1/room/getAll', this.param)
 				.then((response) => {
 					this.isLoading = false;
 					try {
 						if(response.data.error != undefined){
-							this.errors = response.data.error.errorInfo;
+							this.error = response.data.error.errorInfo;
 						}else if(response.data.rooms  != undefined){
 						//app.rooms = response.data.rooms;
 							this.rooms = response.data.rooms;
 						}else{
-							this.errors.push('特定できないエラー');
+							this.error = '特定できないエラー';
 							console.log(response.data);
 						}
 					} catch (err) {
-						this.errors.push(err);
+						this.error = err;
 						console.log(err);
 					}
 				})
 				.catch((err) => {
-					this.errors.push(err);
+					this.error = err;
+					console.log(err);
+				});
+		},
+		loadRoom() {
+			this.isLoading = true;
+			this.form.player.step = 0;
+			this.form.player.roomid = 0;
+			this.error = '';
+			axios
+				.get(this.rootPath + '/api/v1/room/get', {
+					params: this.form.room,
+				})
+				.then((response) => {
+					this.isLoading = false;
+					try {
+						if(response.data.error != undefined){
+							if(response.data.error.errorInfo != undefined) {
+								this.error = response.data.error.errorInfo;
+								alert(response.data.error.errorInfo);
+							}else{
+								this.error = response.data.error;
+								alert(response.data.error);
+							}
+						}else if(response.data.room  != undefined){
+							this.room = response.data.room;
+							this.entryRoom(this.room);
+						}else{
+							this.error = '特定できないエラー';
+							console.log(response.data);
+						}
+					} catch (err) {
+						this.error = err;
+						console.log(err);
+					}
+				})
+				.catch((err) => {
+					this.error = err;
 					console.log(err);
 				});
 		},
@@ -190,6 +241,7 @@ export default {
 			.then((response) => {
 				if(response.data.code == 0){
 					this.form.room.step = 4;
+					this.form.room.url = this.rootPath + '/room/' + response.data.room.key;
 					this.se.Success.play();
 				}else{
 					this.form.room.step = 2;
@@ -214,7 +266,7 @@ export default {
 			.then((response) => {
 				if(response.data.code == 0){
 					this.se.Success.play();
-					this.loadRooms();
+					this.loadRoom();
 				}else{
 					this.form.room.error = response.data.error;
 					this.se.Error.play();
@@ -337,7 +389,7 @@ export default {
 		left:0;
 		right:0;
 		text-align:center;
-		background-color: #333;
+		background-color: #000;
 		bottom:30px;
 	}
 	.btnAdd{
@@ -375,26 +427,42 @@ export default {
 }
 </style>
 <template>
-	<div style="  max-width: 1024px; margin: 0 auto; font-family: 'Reggae One', cursive;">
+	<div style="  max-width: 1024px; height: 100%; background-color: black; margin: 0 auto; font-family: 'Reggae One', cursive;">
 		<div id="header">
 			<Header></Header>
 		</div>
 		<v-card 
-		style="text-align: center; margin-bottom:20px;"
+		style="text-align: center; margin-bottom:20px; background-color: black;"
 		>
 			<div v-bind:class="[form.room.step==0 ? 'scaleShow' : 'scaleHide']">
 				<div style="margin-top:10px;">
+					<!--
 					<v-btn
 					color="purple darken-4"
 					@click="se.Push.play(); loadRooms();"
 					>
 					部屋再読み込み
 					</v-btn>
+					-->
 					<v-btn
 					color="purple darken-4"
 					@click="se.Push.play(); form.room.step=1;"
 					>
 						部屋を作成する
+					</v-btn>
+					<v-btn
+					v-if="form.room.key != ''"
+					color="purple darken-4"
+					@click="se.Push.play(); this.loadRoom();"
+					>
+						プレイヤー一覧
+					</v-btn>
+					<v-btn
+					v-if="form.room.key != ''"
+					color="purple darken-4"
+					@click="se.Push.play(); this.restart(this.room);"
+					>
+						再プレイ
 					</v-btn>
 				</div>
 				<v-container>
@@ -454,6 +522,7 @@ export default {
 				</v-container>
 
 				<!-- Entry Room -->
+				<div v-if="this.room.room != undefined">部屋名：{{ this.room.room.name }}</div>
 				<div v-bind:class="[form.player.step==1 ? 'scaleShow' : 'scaleHide']"
 				style="margin:10px;"
 				>
@@ -515,6 +584,9 @@ export default {
 							</v-col>
 						</v-row>
 					</v-container>
+					<div>この部屋のURL</div>
+					<div>{{ this.url }}</div>
+					<VueQrcode :value="this.url" :options="{ width: 200 }" />
 				</div>
 
 				<!-- create player -->
@@ -750,17 +822,42 @@ export default {
 			</div>
 			<div class="step" v-bind:class="[form.room.step==4 ? 'scaleShow' : 'scaleHide']">
 				<div>部屋ができました！</div>
-				<div>ボタンを押して、作った部屋でプレイヤーを設定しましょう。</div>
-				<v-btn
-				color="purple darken-4"
-				@click="se.Push.play(); form.room.step=0; this.loadRooms();"
-				>
-				部屋一覧表示
-				</v-btn>
+				<div>以下のURLを全プレイヤーとシェアして、各プレイヤーの設定をしてください。</div>
+				<div style="font-size:smaller; color:aquamarine;">
+					<a :href="form.room.url" style="">{{ form.room.url }}</a>
+				</div>
+				<VueQrcode :value="form.room.url" :options="{ width: 200 }" />
+			</div>
+			<div class="error">
+				{{ this.error }}
 			</div>
 		</v-card>
-		<VueQrcode :value="url" :options="{ width: 200 }" />
-		<footer>
+
+		<!--Notifyダイアログ-->
+		<v-dialog 
+		v-model="this.dialog.copyright.show"
+		transition="dialog-top-transition"
+		max-width="400"
+		class="dialog"
+		>
+			<v-card maxWidth="400" height="400">
+				<v-card-text style="overflow-y: auto;">
+					<CopyRight></CopyRight>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.dialog.copyright.show = false;"
+					>
+						閉じる
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<footer @click="this.dialog.copyright.show = true;">
 			<Footer></Footer>
 		</footer>
 	</div>
