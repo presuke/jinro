@@ -97,7 +97,7 @@ class Room extends BaseController
 
                 $existRoom = DB::table('room')->where(['name' => $params['name']])->count();
                 if ($existRoom > 0) {
-                    $ret['code'] = 9;
+                    $ret['code'] = 8;
                     $ret['error'] = '部屋名"' . $params['name'] . '"は既に存在します。別の部屋名を指定してください。';
                     return $ret;
                 }

@@ -18,6 +18,7 @@ export default defineConfig({
             input: [
                 'resources/sass/app.scss',
                 'resources/css/app.css',
+                'resources/js/index/app.js',
                 'resources/js/room/app.js',
                 'resources/js/play/app.js',
                 'resources/js/app.js',

@@ -244,7 +244,7 @@ export default {
 					this.form.room.url = this.rootPath + '/room/' + response.data.room.key;
 					this.se.Success.play();
 				}else{
-					this.form.room.step = 2;
+					this.form.room.step = (response.data.code == 8) ? 1 : 2;
 					this.form.room.error = response.data.error;
 					this.se.Error.play();
 				}
