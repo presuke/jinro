@@ -24,7 +24,7 @@ export default {
 		form: {
 			selection: {
 				sex: ['male', 'fmale'],
-				imgs: [0,1,2,3,4,5,6,7,8,9,10,11],
+				imgs: ['00','01','02','03','04','05','06','07','08','09','10','11','12'],
 			},
 			player: {
 				step: 0,
@@ -559,7 +559,7 @@ export default {
 								<div v-if="player.name != ''">
 									<div style="float: left;">
 										<img 
-										:src="rootPath + '/image/avatar/' + player.sex + '/icon0' + player.img + '.png'" 
+										:src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img + '.png'" 
 										class="rounded-circle"
 										Width="30"
 										Height="30"
@@ -582,11 +582,7 @@ export default {
 										プレイヤー未作成
 									</div>
 								</div>
-								<div
-									style="
-										float: right;
-									"
-								>
+								<div style="float: right;">
 									<v-btn
 										@click="playGame(player)"
 										color="purple darken-4"
@@ -606,7 +602,8 @@ export default {
 				</div>
 
 				<!-- create player -->
-				<div v-bind:class="[form.player.step==2 ? 'scaleShow' : 'scaleHide']" 
+				<div 
+				:class="[form.player.step==2 ? 'scaleShow' : 'scaleHide']" 
 				style="margin:10px;"
 				>
 					<div>
@@ -665,7 +662,7 @@ export default {
 								contain
 							>
 								<img 
-								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon0' + img + '.png'" 
+								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon' + img + '.png'" 
 								class="rounded-circle"
 								/>
 							</v-carousel-item>
@@ -688,7 +685,8 @@ export default {
 				</div>
 
 				<!-- created Player -->
-				<div  v-bind:class="[form.player.step==3 ? 'scaleShow' : 'scaleHide']"
+				<div 
+				:class="[form.player.step==3 ? 'scaleShow' : 'scaleHide']"
 				style="margin-top:10px;"
 				>
 					<v-card>
@@ -699,7 +697,7 @@ export default {
 						</v-card-title>
 						<v-card-text>
 							<img 
-								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon0' + form.player.img + '.png'" 
+								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon' + form.player.img + '.png'" 
 								class="rounded-circle"
 								/>
 							<div>
@@ -716,7 +714,9 @@ export default {
 				</div>
 			</div>
 			<!--create room-->
-			<div class="step" v-bind:class="[form.room.step==1 ? 'scaleShow' : 'scaleHide']">
+			<div 
+			class="step" 
+			:class="[form.room.step==1 ? 'scaleShow' : 'scaleHide']">
 				ゲームルームの設定をしてください。
 				<div>
 					<v-text-field
@@ -754,14 +754,29 @@ export default {
 								:src="form.room.controll.btnAdd" 
 								@click="changeNum(role, 1)" />
 								<div class="name">
-									{{ role.name }}
+									<span v-if="role.team == 1" style="color:red;">
+										{{ role.name }}
+									</span>
+									<span v-else style="color:yellow;">
+										{{ role.name }}
+									</span>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
+				<div style="clear:left;">
+					<div>
+						<span style="color:red;">赤文字表示</span>
+						<span>　人狼チーム</span>
+					</div>
+					<div>
+						<span style="color:yellow;">黄文字表示</span>
+						<span>　村人チーム</span>
+					</div>
+				</div>
 				<div 
-				v-bind:class="[form.room.role.name!='' ? 'scaleShow' : 'scaleHide']"
+				:class="[form.room.role.name!='' ? 'scaleShow' : 'scaleHide']"
 				style="clear:both; border-radius: 5px; border: solid 1px yellow; padding:5px; margin:10px;"
 				>
 					<div>

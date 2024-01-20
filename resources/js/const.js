@@ -32,6 +32,7 @@ export default {
                 color: 'gray',
                 num: 0,
                 power: false,
+                team: 0,
                 command:[]
             },
             {
@@ -43,6 +44,7 @@ export default {
                 color: 'red',
                 num: 0,
                 power: true,
+                team: 1,
                 command:[]
             },
             {
@@ -54,6 +56,7 @@ export default {
                 color: 'green',
                 num: 0,
                 power: false,
+                team: 0,
                 command:[]
             },
             {
@@ -65,6 +68,7 @@ export default {
                 color: 'magenta',
                 num: 0,
                 power: false,
+                team: 0,
                 command:[]
             },
             {
@@ -76,6 +80,7 @@ export default {
                 color: 'cyan',
                 num: 0,
                 power: false,
+                team: 0,
                 command:[]
             },
             {
@@ -87,6 +92,7 @@ export default {
                 color: 'orange',
                 num: 0,
                 power: false,
+                team: 1,
                 command:[]
             },
             {
@@ -98,6 +104,7 @@ export default {
                 color: 'gold',
                 num: 0,
                 power: true,
+                team: 0,
                 command:[]
             },
             {
@@ -109,6 +116,7 @@ export default {
                 color: 'purple',
                 num: 0,
                 power: false,
+                team: 1,
                 command:[]
             },
             {
@@ -120,6 +128,7 @@ export default {
                 color: 'darkblue',
                 num: 0,
                 power: false,
+                team: 0,
                 command:[]
             },
             {
@@ -131,6 +140,7 @@ export default {
                 color: 'lightyellow',
                 num: 0,
                 power: false,
+                team: 0,
                 command:[]
             },
         ],

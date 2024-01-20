@@ -224,10 +224,7 @@ export default {
 						for(let i=0; i<this.room.roles.length; i++){
 							this.const.roles.forEach((role) => {
 								if(role.id == this.room.roles[i].id){
-									this.room.roles[i].img = role.img;
-									this.room.roles[i].name = role.name;
-									this.room.roles[i].color = role.color;
-									this.room.roles[i].description = role.description;
+									this.room.roles[i] = role;
 								}
 							});
 						}
@@ -662,6 +659,11 @@ export default {
 		},
 		login(){
 			this.dialog.login.error = '';
+			if(this.dialog.login.pass == ''){
+				this.dialog.login.error = 'パスワードを入力してください';
+				this.se.Error.play();
+				return false;
+			}
 
 			axios
 			.post(this.rootPath + '/api/v1/play/login', {
@@ -941,16 +943,32 @@ export default {
 								<div class="num">
 									{{ role.num }}
 								</div>
-								<div class="name" v-bind:style="{ boxShadow: `0px 5px 10px ${role.color}` }">
-									{{ role.name }}
+								<div 
+								class="name" 
+								:style="{ boxShadow: `0px 5px 10px ${role.color}` }">
+									<span v-if="role.team == 1" style="color:red;">
+										{{ role.name }}
+									</span>
+									<span v-else style="color:yellow;">
+										{{ role.name }}
+									</span>
 								</div>
 							</div>
 						</div>
-						<br style="clear:both;" />
 					</div>
 					<div style="border:solid thin darkgray; border-radius: 5px; padding:5px; font-size:smaller;">
 						{{ this.dialog.roomInfo.description }}
 					</div>
+					<div style="clear:left;">
+							<div>
+								<span style="color:red;">赤文字表示</span>
+								<span>　人狼チーム</span>
+							</div>
+							<div>
+								<span style="color:yellow;">黄文字表示</span>
+								<span>　村人チーム</span>
+							</div>
+						</div>
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
@@ -974,7 +992,7 @@ export default {
 		>
 			<v-card width="320" height="580">
 				<v-card-title>
-					あなたのカード
+					あなたの役割
 				</v-card-title>
 				<v-card-text style="overflow-y: auto;">
 					<div 
@@ -982,12 +1000,23 @@ export default {
 					style="width:260px; height:260px;"
 					:style="{ backgroundImage: `url('${this.me.role.img}')` }"
 					>
-						<div style="width:100%; text-align:cener; background-color:rgba(0, 0, 0, 0.5);">
+						<div style="background-color:rgba(0, 0, 0, 0.5);">
 							{{ this.me.role.name }}
 						</div>
 					</div>
 					<div style="width:100%; text-align:cener; background-color:rgba(0, 0, 0, 0.5);">
 						{{ this.me.role.description }}
+					</div>
+					<div style="border:solid thin gray; border-radius: 5px; padding:5px;">
+						勝利条件
+						<div v-if="this.me.role.team == 1">
+							人狼チームです。<br>
+							投獄されていないプレイヤーの数が、村人チームと同数以上になったら勝利します。
+						</div>
+						<div v-else>
+							村人チームです。<br>
+							役割が人狼のプレイヤーを全て投獄すると勝利します。
+						</div>
 					</div>
 				</v-card-text>
 				<v-card-actions>
