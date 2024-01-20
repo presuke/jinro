@@ -1,6 +1,6 @@
 <script>
 import CopyRight from '../CopyRight.vue';
-import Header from '../Header.vue';
+import Header from '../Header2.vue';
 import Footer from '../Footer.vue';
 import Const from '../../js/const.js';
 
@@ -772,8 +772,9 @@ export default {
 				v-if="player.sex == ''"
 				class="player"
 				>
-					<img :src="rootPath + '/image/avatar/random.png'"
-					style="width:50px; height:50px;border-radius:50%;"
+					<img 
+					class="icon" 
+					:src="rootPath + '/image/avatar/random.png'"
 					/>
 					<div style="font-size:smaller;">
 						?

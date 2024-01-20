@@ -15,11 +15,15 @@
     .player{
         margin:5px;
         position: relative;
-        width:60px;
-        height:80px;
+        width:min(15vw, 15vh);
+        height:min(15vw, 15vh);
+        max-width:130px;
+        max-height:130px;
         .icon{
-            width:60px;
-            height:60px;
+            width:min(12vw, 12vh);
+            height:min(12vw, 12vh);
+            max-width:104px;
+            max-height:104px;
             border-radius:50%;
             cursor: pointer;
         }

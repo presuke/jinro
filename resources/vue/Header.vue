@@ -45,6 +45,7 @@ viewBox="0 24 100 28" preserveAspectRatio="none" shape-rendering="auto">
         float:left;
     }
     .logo {
+        margin-top: -50px;
         position: absolute;
         top:5;
         left:5;

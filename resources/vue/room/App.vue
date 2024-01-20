@@ -51,6 +51,7 @@ export default {
 					description: '',
 				},
 				playerNum: 0,
+				playerNumMax: 20,
 				error: '',
 			}, //カンマを追加
 		},
@@ -225,6 +226,10 @@ export default {
 						this.form.room.error = '人狼は1人以上設定してください';
 					}
 				});
+
+				if(this.form.room.playerNum > this.form.room.playerNumMax){
+					this.form.room.error = 'プレイヤー数は' + this.form.room.playerNumMax + '人以下にしてください';
+				}
 			}
 			if (this.form.room.error == '') {
 				this.form.room.step = 2;
@@ -354,6 +359,8 @@ export default {
 }
 .step{
 	width: 100%;
+	height:calc(100vh - 150px);
+	overflow-y: auto;
 }
 .inRoom{
 	border-radius:5px;
@@ -434,7 +441,9 @@ export default {
 		<v-card 
 		style="text-align: center; margin-bottom:20px; background-color: black;"
 		>
-			<div v-bind:class="[form.room.step==0 ? 'scaleShow' : 'scaleHide']">
+			<div 
+			class="step" 
+			:class="[form.room.step==0 ? 'scaleShow' : 'scaleHide']">
 				<div style="margin-top:10px;">
 					<!--
 					<v-btn
@@ -522,21 +531,31 @@ export default {
 				</v-container>
 
 				<!-- Entry Room -->
-				<div v-if="this.room.room != undefined">部屋名：{{ this.room.room.name }}</div>
-				<div v-bind:class="[form.player.step==1 ? 'scaleShow' : 'scaleHide']"
+				<div v-if="this.room.room != undefined">部屋名：{{ this.room.room.name }}のQR</div>
+				<VueQrcode 
+				v-if="this.url" 
+				:value="this.url" 
+				:options="{ width: 100 }" />
+				<div 
+				:class="[form.player.step==1 ? 'scaleShow' : 'scaleHide']"
 				style="margin:10px;"
 				>
 					<v-container>
 						<v-row style="margin: 0 10;">
 							プレイするプレイヤーを選んでください。
 						</v-row>
-						<v-row v-for="player in playersOnRoom" :key="id">
+						<v-row 
+						v-for="(player, index) in playersOnRoom" 
+						:key="index">
 							<v-col
 								style="
 									border-bottom:solid thin lightgray;
 									padding: 10px;
 								"
 							>
+								<div style="float: left;">
+									{{ index + 1 }}&nbsp;
+								</div>
 								<div v-if="player.name != ''">
 									<div style="float: left;">
 										<img 
@@ -584,9 +603,6 @@ export default {
 							</v-col>
 						</v-row>
 					</v-container>
-					<div>この部屋のURL</div>
-					<div>{{ this.url }}</div>
-					<VueQrcode :value="this.url" :options="{ width: 200 }" />
 				</div>
 
 				<!-- create player -->
@@ -762,7 +778,7 @@ export default {
 				<div>
 					<v-btn
 					color="purple darken-4"
-					@click="se.Push.play(); form.room.step = 0; this.loadRooms();"
+					@click="se.Push.play(); form.room.step = 0;"
 					>
 					戻る
 					</v-btn>
@@ -826,7 +842,10 @@ export default {
 				<div style="font-size:smaller; color:aquamarine;">
 					<a :href="form.room.url" style="">{{ form.room.url }}</a>
 				</div>
-				<VueQrcode :value="form.room.url" :options="{ width: 200 }" />
+				<VueQrcode 
+				v-if="form.room.url" 
+				:value="form.room.url" 
+				:options="{ width: 200 }" />
 			</div>
 			<div class="error">
 				{{ this.error }}
