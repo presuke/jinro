@@ -246,11 +246,7 @@ export default {
 							player.role = this.getRole(player.roleid);
 						});
 						//初回パワー有効
-						if(this.reflesh.total == 0){
-							if(this.me.role.power){
-								this.isUsingPower = true;
-							}
-						}
+						this.isUsingPower = this.me.role.power;
 
 						//時間帯による処理
 						switch(this.info.time){
