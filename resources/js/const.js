@@ -13,6 +13,7 @@ import ImgC9 from '../image/role/9.png';
 import SePush from '../se/push.mp3';
 import SeSuccess from '../se/success.mp3';
 import SeError from '../se/error.mp3';
+import SeClock from '../se/clock.mp3';
 import SeJail from '../se/jail.mp3';
 import SeWin from '../se/win.mp3';
 import SeConsider from '../se/consider.mp3';
@@ -172,6 +173,7 @@ export default {
             Success: new Audio(SeSuccess),
             Error: new Audio(SeError),
             Push: new Audio(SePush),
+            Clock: new Audio(SeClock),
             Jail: new Audio(SeJail),
             Win: new Audio(SeWin),
             Consider:new Audio(SeConsider),

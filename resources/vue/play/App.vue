@@ -208,6 +208,7 @@ export default {
 					this.info.message = this.countdown.action + 'の締め切り時間が来ました。他のプレイヤーが' + this.countdown.action + 'を変更しなければ結果発表に移ります。';
 				}else{
 					this.info.message = 'あと'+ this.countdown.sec + '秒で' + this.countdown.action + 'を締め切ります。変更があるならお早めに';
+					this.se.SeClock.play();
 				}
 				this.countdown.sec--;
 			}, this.countdown.const.interval);
