@@ -7,6 +7,7 @@
 
   <title>人狼</title>
   @vite(['resources/css/app.css', 'resources/js/index/app.js'])
+  <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}">
   <link href="//fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="//cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="//cdn.jsdelivr.net/npm/vuetify@3.x/dist/vuetify.min.css" rel="stylesheet">
