@@ -95,12 +95,15 @@ class Room extends BaseController
 
                 $params = $params['params'];
 
+                /*
+                部屋名の重複は許可
                 $existRoom = DB::table('room')->where(['name' => $params['name']])->count();
                 if ($existRoom > 0) {
                     $ret['code'] = 8;
                     $ret['error'] = '部屋名"' . $params['name'] . '"は既に存在します。別の部屋名を指定してください。';
                     return $ret;
                 }
+                */
 
                 //部屋作成
                 $roles = [];

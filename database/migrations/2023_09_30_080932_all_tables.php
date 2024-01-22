@@ -21,7 +21,7 @@
             Schema::create('room', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('key')->comment('キー')->unique();
-                $table->string('name')->comment('部屋名')->unique();
+                $table->string('name')->comment('部屋名');
                 $table->integer('day')->default(1)->comment('何日目か');
                 $table->integer('time')->default(0)->comment('時間帯（夕方：投票、夜：投票結果発表、深夜：攻防、朝：攻防結果発表）');
                 $table->integer('win')->default(0)->comment('どちらが勝ったか（1：村人、2：人狼）');

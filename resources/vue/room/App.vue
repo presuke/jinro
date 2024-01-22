@@ -25,6 +25,7 @@ export default {
 			selection: {
 				sex: ['male', 'fmale'],
 				imgs: ['00','01','02','03','04','05','06','07','08','09','10','11','12'],
+				selected: [],
 			},
 			player: {
 				step: 0,
@@ -128,6 +129,11 @@ export default {
 								alert(response.data.error);
 							}
 						}else if(response.data.room  != undefined){
+							response.data.room.players.forEach((player) =>{
+								if(player.sex != ''){
+									this.form.selection.selected.push(player.sex + '_' + player.img);
+								}
+							});
 							this.room = response.data.room;
 							this.entryRoom(this.room);
 						}else{
@@ -174,17 +180,6 @@ export default {
 			}
 			else if(this.form.player.pass == ''){
 				this.form.player.error = 'パスワードを入力してください。';
-			}else{
-				this.playersOnRoom.forEach((player) =>{
-					if(player.id != this.form.player.id){
-						if(player.name == this.form.player.name){
-							this.form.player.error = '名前が他のプレイヤーと重複しています。選び直してください。';
-						}
-						else if(player.sex == this.form.player.sex && player.img == this.form.player.img){
-							this.form.player.error = 'アバターが他のプレイヤーと重複しています。選び直してください。';
-						}
-					}
-				});
 			}
 			if(this.form.player.error != ''){
 				this.se.Error.play();
@@ -197,11 +192,23 @@ export default {
 							this.form.player = response.data.player;
 							this.form.player.roomid = 0;
 							this.form.player.step = 3;
+						}else if(response.data.code !=undefined){
+							response.data.avators.forEach((avator) =>{
+								this.form.selection.selected.push(avator.sex + '_' + avator.img);
+							});
+							if(response.data.code == 1){
+								this.form.player.error = '同じ名前のプレイヤーが存在します。別の名前にしてください。';
+								this.se.Error.play();
+							}
+							else if(response.data.code == 2){
+								this.form.player.error = '同じアバターのプレイヤーが存在します。別のアバターを選択してください。';
+								this.se.Error.play();
+							}
 						}
 						else if(response.data.error != undefined){
-							this.errors = response.data.error.errorInfo;
+							this.form.player.error = response.data.error.errorInfo;
 						}else{
-							this.errors = '特定できないエラー';
+							this.form.player.error = '特定できないエラー';
 						}
 					} catch (e) {
 						this.errors = e;
@@ -583,7 +590,7 @@ export default {
 								<div v-if="player.name != ''">
 									<div style="float: left;">
 										<img 
-										:src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img + '.png'" 
+										:src="rootPath + '/image/avatar/' + player.sex + '/icon' + ( '00' + player.img ).slice( -2 ) + '.png'" 
 										class="rounded-circle"
 										Width="30"
 										Height="30"
@@ -687,6 +694,7 @@ export default {
 								contain
 							>
 								<img 
+								:style="[(this.form.selection.selected.indexOf(form.player.sex + '_' + Number(img))) == -1 ? '' : 'filter:grayscale(1);']"
 								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon' + img + '.png'" 
 								class="rounded-circle"
 								/>
@@ -842,7 +850,9 @@ export default {
 				</div>
 				<div>部屋名:{{ form.room.name }}</div>
 				<div style="text-align: center;">
-					<div v-for="role in form.room.roles" 
+					<div 
+					v-for="role in form.room.roles" 
+					:key="role"
 					style="margin:0 auto; width:min(80vw, 600px);"
 					>
 						<div style="float:left;">
@@ -850,11 +860,11 @@ export default {
 							class="role"
 							:style="{ backgroundImage: `url('${role.img}')` }"
 							>
-								<div class="num">
-									{{ role.num }}
-								</div>
 								<div class="name">
 									{{ role.name }}
+								</div>
+								<div class="num" style="top:0;right:0;">
+									{{ role.num }}
 								</div>
 							</div>
 						</div>

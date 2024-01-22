@@ -787,6 +787,7 @@ export default {
 		<div id="players">
 			<div
 			v-for="player in this.players"
+			:key="player"
 			style="float:left;"
 			>
 				<div
