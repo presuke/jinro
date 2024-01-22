@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>人狼</title>
   @vite(['resources/css/app.css', 'resources/js/play/app.js'])
+  <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}">
   <style>
     body {
       background-color: #111;
