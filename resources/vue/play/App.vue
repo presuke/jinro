@@ -828,7 +828,7 @@ export default {
 					class="attacked"
 					:class="[player.attacked == 9 ? 'show' : 'hide', ]">
 						<img 
-						:src="rootPath + '/image/attacked.png'" style="width:30px; height:30px;" />
+						:src="rootPath + '/image/attacked.png'" style="width:50%; height:50%;" />
 					</div>
 					<img 
 					class="icon"
@@ -1097,7 +1097,9 @@ export default {
 				<v-card-title>
 					投票結果
 				</v-card-title>
-				<v-card-text class="jail">
+				<v-card-text 
+				:style="{ backgroundImage: 'url(' + rootPath + '/image/jail.jpg)' }"
+				class="jail">
 					{{ this.dialog.result.vote.player.name }}さんが投獄されました。
 					<img :src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
 					class="icon"
@@ -1128,6 +1130,7 @@ export default {
 				</v-card-title>
 				<v-card-text>
 					<div v-if="this.dialog.result.action.attackedPlayers.length > 0"
+					:style="{ backgroundImage: 'url(' + rootPath + '/image/jail.jpg)' }"
 					class="confine">
 						以下のプレイヤーが人狼に拉致されて投獄されました。
 						<div style="clear:left;">
@@ -1146,6 +1149,7 @@ export default {
 						</div>
 					</div>
 					<div v-if="this.dialog.result.action.freedomPlayers.length > 0"
+					:style="{ backgroundImage: 'url(' + rootPath + '/image/freedom.jpg)' }"
 					class="freedom">
 						以下のプレイヤーが天使により救われました。
 						<div style="clear:left;">
