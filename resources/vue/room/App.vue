@@ -402,14 +402,21 @@ export default {
 	position:absolute;
 	left:0;
 	right:0;
+	bottom:50px;
 	text-align:center;
-	background-color: #999;
-	bottom:60px;
+	background-color: rgba(0,0,0,0.5);;
+}
+.num{
+	position:absolute;
+	left:0;
+	right:0;
+	bottom:30px;
+	text-align:center;
 }
 .btnAdd{
 	position:absolute;
 	right:5px;
-	bottom:45px;
+	bottom:30px;
 	width:25px;
 	height: 25px;
 	z-index:2;
@@ -417,7 +424,7 @@ export default {
 .btnRemove{
 	position:absolute;
 	left:5px;
-	bottom:45px;
+	bottom:30px;
 	width:25px;
 	height: 25px;
 	z-index:2;
