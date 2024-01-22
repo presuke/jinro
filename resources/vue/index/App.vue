@@ -127,6 +127,9 @@ a.btn-border-gradient {
 			<div class="btn-border-gradient-wrap btn-border-gradient-wrap--gold">
 				<a href="./room/" class="btn btn-border-gradient"><span class="btn-text-gradient--gold">Play Game</span></a>
 			</div>
+			<div class="btn-border-gradient-wrap btn-border-gradient-wrap--gold">
+				<a href="https://www.nicovideo.jp/watch/sm43303622" target="_blank" class="btn btn-border-gradient"><span class="btn-text-gradient--gold">How To</span></a>
+			</div>
 		</div>
 	</div>
 	<!--Notifyダイアログ-->
