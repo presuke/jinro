@@ -1,4 +1,5 @@
 <script>
+import axios from 'axios';
 import CopyRight from '../CopyRight.vue';
 import Header from '../Header2.vue';
 import Footer from '../Footer.vue';
@@ -104,8 +105,13 @@ export default {
 			},
 			roomInfo:{
 				show: false,
-				description: 'test',
-				defaultdescription: 'カードをタップすると説明が表示されます。',
+				role:{
+					name:'',
+					img:'',
+					command: [],
+					description: '',
+					defaultdescription: 'カードをタップすると説明が表示されます。',
+				}
 			},
 			myCard:{
 				show: false,
@@ -127,7 +133,7 @@ export default {
 		if(this.authtoken == null)
 			this.authtoken = '';
 
-		this.dialog.roomInfo.description = this.dialog.roomInfo.defaultdescription;
+		this.dialog.roomInfo.role.description = this.dialog.roomInfo.role.defaultdescription;
 
 		//役割ごとのコマンドを設定
 		this.const.roles.forEach((role) => {
@@ -657,6 +663,19 @@ export default {
 				}
 			});
 		},
+		showRoleInfo(role){
+			this.dialog.roomInfo.role = JSON.parse(JSON.stringify(role));
+			document.getElementById('roledescription').classList.remove('scaleHide');
+			document.getElementById('roledescription').classList.add('scaleShow');
+		},
+		clearRoleInfo(){
+			this.dialog.roomInfo.role.name = '';
+			this.dialog.roomInfo.role.img = '';
+			this.dialog.roomInfo.role.command = [];
+			this.dialog.roomInfo.role.description = this.dialog.roomInfo.role.defaultdescription;
+			document.getElementById('roledescription').classList.remove('scaleShow');
+			document.getElementById('roledescription').classList.add('scaleHide');
+		},
 		login(){
 			this.dialog.login.error = '';
 			if(this.dialog.login.pass == ''){
@@ -758,7 +777,7 @@ export default {
 			<Header></Header>
 		</header>
 
-		<v-progress-linear 
+		<v-progress-linear
 		v-model="this.reflesh.countValue"
 		color="purple">
 		</v-progress-linear>
@@ -927,18 +946,19 @@ export default {
 		>
 			<v-card width="320" height="700">
 				<v-card-title>
-					{{ this.room.name }}
+					部屋名：{{ this.room.name }}
 				</v-card-title>
 				<v-card-text style="overflow-y: auto;">
 					<div id="roles">
 						<div
 						v-for="role in this.room.roles"
+						:key="role"
 						style="float:left;"
 						>
 							<div 
 							class="role"
 							:style="{ backgroundImage: `url('${role.img}')` }"
-							@click="this.dialog.roomInfo.description = role.description"
+							@click="showRoleInfo(role);"
 							>
 								<div class="num">
 									{{ role.num }}
@@ -956,26 +976,53 @@ export default {
 							</div>
 						</div>
 					</div>
-					<div style="border:solid thin darkgray; border-radius: 5px; padding:5px; font-size:smaller;">
-						{{ this.dialog.roomInfo.description }}
-					</div>
-					<div style="clear:left;">
+					<div id="roledescription">
+						<div v-if="this.dialog.roomInfo.role.name != ''">
 							<div>
-								<span style="color:red;">赤文字表示</span>
-								<span>　人狼チーム</span>
+								{{ this.dialog.roomInfo.role.name }}
 							</div>
+							<img
+							style="width:280px; height: auto;"
+							:src="this.dialog.roomInfo.role.img" 
+							/>
 							<div>
-								<span style="color:yellow;">黄文字表示</span>
-								<span>　村人チーム</span>
+								{{ this.dialog.roomInfo.role.description }}
+							</div>
+							深夜に選択可能な行動：
+							<span
+							v-for="command in this.dialog.roomInfo.role.command"
+							:key="command"
+							>
+								{{ command.name }} &nbsp;
+							</span>
+							<div style="text-align:right;">
+								<v-btn
+								color="blue-darken-1"
+								variant="text"
+								@click="this.clearRoleInfo();"
+								>
+									閉じる
+								</v-btn>
 							</div>
 						</div>
+					</div>
+					<div style="clear:left;">
+						<div>
+							<span style="color:red;">赤文字表示</span>
+							<span>人狼チーム</span>
+						</div>
+						<div>
+							<span style="color:yellow;">黄文字表示</span>
+							<span>村人チーム</span>
+						</div>
+					</div>
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn
 					color="blue-darken-1"
 					variant="text"
-					@click="this.dialog.roomInfo.show = false; this.dialog.roomInfo.description = this.dialog.roomInfo.defaultdescription"
+					@click="this.dialog.roomInfo.show = false; this.clearRoleInfo();"
 					>
 						閉じる
 					</v-btn>
@@ -1007,6 +1054,13 @@ export default {
 					<div style="width:100%; text-align:cener; background-color:rgba(0, 0, 0, 0.5);">
 						{{ this.me.role.description }}
 					</div>
+					深夜に選択可能な行動：
+					<span
+					v-for="command in this.me.role.command"
+					:key="command"
+					>
+						{{ command.name }} &nbsp;
+					</span>
 					<div style="border:solid thin gray; border-radius: 5px; padding:5px;">
 						勝利条件
 						<div v-if="this.me.role.team == 1">
@@ -1074,11 +1128,12 @@ export default {
 				<v-card-text>
 					<div v-if="this.dialog.result.action.attackedPlayers.length > 0"
 					class="confine">
-						以下の人が、人狼に拉致されて、投獄されました。
+						以下のプレイヤーが人狼に拉致されて投獄されました。
 						<div style="clear:left;">
-							<div 
+							<div
 							style="float:left;text-align:center;"
 							v-for="player in this.dialog.result.action.attackedPlayers"
+							:key="player"
 							>
 								<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
 								class="icon"
@@ -1091,11 +1146,12 @@ export default {
 					</div>
 					<div v-if="this.dialog.result.action.freedomPlayers.length > 0"
 					class="freedom">
-						以下の人が、天使により救われました。
+						以下のプレイヤーが天使により救われました。
 						<div style="clear:left;">
 							<div 
 							style="float:left;text-align:center;"
 							v-for="player in this.dialog.result.action.freedomPlayers"
+							:key="player"
 							>
 								<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
 								class="icon"
@@ -1109,6 +1165,7 @@ export default {
 					<ul 
 					style="margin-left:10px;list-style-type:none;"
 					v-for="message in this.dialog.result.action.message"
+					:key="message"
 					>
 						<li>
 							{{ message }}
@@ -1141,11 +1198,11 @@ export default {
 				<v-card-title>
 					占い結果
 				</v-card-title>
-				<v-card-text 
+				<v-card-text
 				style="background-size: contain; background-position: center; text-shadow: 0 0 5px black;"
 				:style="{ backgroundImage: `url('${this.dialog.predict.target.role.img}')` }">
 					<div>
-						<img 
+						<img
 						style="width:100px; height:100px; border-radius: 50%;"
 						:src="rootPath + '/image/avatar/' + this.dialog.predict.target.sex + '/icon' + this.dialog.predict.target.img.toString().padStart( 2, '0') + '.png'"
 						/>
@@ -1176,11 +1233,11 @@ export default {
 				<v-card-title>
 					霊媒結果
 				</v-card-title>
-				<v-card-text 
+				<v-card-text
 				style="background-size: contain; background-position: center; text-shadow: 0 0 5px black;"
 				:style="{ backgroundImage: `url('${this.dialog.expose.target.role.img}')` }">
 				<div>
-					<img 
+					<img
 					style="width:100px; height:100px; border-radius: 50%;"
 					:src="rootPath + '/image/avatar/' + this.dialog.expose.target.sex + '/icon' + this.dialog.expose.target.img.toString().padStart( 2, '0') + '.png'"
 					/>
@@ -1201,7 +1258,7 @@ export default {
 		</v-dialog>
 
 		<!--Notifyダイアログ-->
-		<v-dialog 
+		<v-dialog
 		v-model="this.dialog.copyright.show"
 		transition="dialog-top-transition"
 		max-width="400"
@@ -1232,7 +1289,7 @@ export default {
 		</v-dialog>
 
 		<!--確認ダイアログ-->
-		<v-dialog 
+		<v-dialog
 		v-model="this.dialog.confirm.show"
 		transition="dialog-top-transition"
 		max-width="400"
@@ -1321,7 +1378,9 @@ export default {
 				</v-row>
 				<!--深夜-->
 				<v-row :class="[this.info.time==2 ? 'scaleShow': 'scaleHide']">
-					<v-col v-for="command in this.me.role.command">
+					<v-col 
+					v-for="command in this.me.role.command"
+					:key="command">
 						<v-btn
 						@click="this.act(command.action);"
 						>

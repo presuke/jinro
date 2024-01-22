@@ -308,6 +308,12 @@ export default {
 		showDescription(role){
 			this.form.room.role.name = role.name;
 			this.form.room.role.description = role.description;
+			document.getElementById('description').classList.remove('scaleHide');
+			document.getElementById('description').classList.add('scaleShow');
+			setTimeout(() => {
+				document.getElementById('description').classList.remove('scaleShow');
+				document.getElementById('description').classList.add('scaleHide');
+			},3000);
 		},
 		changeNum(role, num){
 			this.se.Push.play();
@@ -391,30 +397,41 @@ export default {
 		background-color: rgba(255, 0, 0, 0.5);
 		border-radius: 50%;
 	}
-	.name{
-		position:absolute;
-		left:0;
-		right:0;
-		text-align:center;
-		background-color: #000;
-		bottom:30px;
-	}
-	.btnAdd{
-		position:absolute;
-		right:5px;
-		bottom:45px;
-		width:25px;
-		height: 25px;
-		z-index:2;
-	}
-	.btnRemove{
-		position:absolute;
-		left:5px;
-		bottom:45px;
-		width:25px;
-		height: 25px;
-		z-index:2;
-	}
+}
+.name{
+	position:absolute;
+	left:0;
+	right:0;
+	text-align:center;
+	background-color: #999;
+	bottom:60px;
+}
+.btnAdd{
+	position:absolute;
+	right:5px;
+	bottom:45px;
+	width:25px;
+	height: 25px;
+	z-index:2;
+}
+.btnRemove{
+	position:absolute;
+	left:5px;
+	bottom:45px;
+	width:25px;
+	height: 25px;
+	z-index:2;
+}
+#description{
+	position: absolute; 
+	top: 0; 
+	left:0;
+	border-radius: 5px; 
+	border: solid 1px yellow; 
+	background-color: rgba(0,0,0,0.75);
+	padding:5px; 
+	margin:10px; 
+	z-index:9;
 }
 .scaleShow{
 	transition: all 0.5s 0s ease;
@@ -659,6 +676,7 @@ export default {
 						>
 							<v-carousel-item
 								v-for="img in form.selection.imgs"
+								:key="img"
 								contain
 							>
 								<img 
@@ -697,7 +715,7 @@ export default {
 						</v-card-title>
 						<v-card-text>
 							<img 
-								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon' + form.player.img + '.png'" 
+								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon' + ( '00' + form.player.img ).slice( -2 ) + '.png'" 
 								class="rounded-circle"
 								/>
 							<div>
@@ -733,17 +751,31 @@ export default {
 						現在のプレイヤー数：{{ this.form.room.playerNum }}
 					</div>
 
-					<div v-for="role in form.room.roles" 
+					<div 
+					v-for="role in form.room.roles" 
+					:key="role"
 					style="margin:0 auto; width:min(80vw, 600px);"
 					>
 						<div style="float:left;">
 							<div 
-							class="role"
-							:style="{ backgroundImage: `url('${role.img}')` }"
-							@click="this.showDescription(role)"
+							style="position:relative;"
 							>
+								<div 
+								class="role"
+								:style="{ backgroundImage: `url('${role.img}')` }"
+								@click="this.showDescription(role)"
+								>
+								</div>
 								<div class="num">
 									{{ role.num }}
+								</div>
+								<div class="name">
+									<span v-if="role.team == 1" style="color:red;">
+										{{ role.name }}
+									</span>
+									<span v-else style="color:yellow;">
+										{{ role.name }}
+									</span>
 								</div>
 								<img 
 								class="btnRemove"
@@ -753,14 +785,6 @@ export default {
 								class="btnAdd"
 								:src="form.room.controll.btnAdd" 
 								@click="changeNum(role, 1)" />
-								<div class="name">
-									<span v-if="role.team == 1" style="color:red;">
-										{{ role.name }}
-									</span>
-									<span v-else style="color:yellow;">
-										{{ role.name }}
-									</span>
-								</div>
 							</div>
 						</div>
 					</div>
@@ -776,8 +800,8 @@ export default {
 					</div>
 				</div>
 				<div 
+				id="description"
 				:class="[form.room.role.name!='' ? 'scaleShow' : 'scaleHide']"
-				style="clear:both; border-radius: 5px; border: solid 1px yellow; padding:5px; margin:10px;"
 				>
 					<div>
 						役割説明　【{{ this.form.room.role.name }}】

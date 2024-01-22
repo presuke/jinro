@@ -123,7 +123,7 @@ a.btn-border-gradient {
 	<div style="text-align: center; height:calc(100vh - 100px);">
 		<div style="margin:auto; position: relative;">
 
-			<img src="image/top2.png" style="width:100%; height:auto;" />
+			<img src="image/top2.png" style="max-width:600px; width:100%; height:auto;" />
 			<div class="btn-border-gradient-wrap btn-border-gradient-wrap--gold">
 				<a href="./room/" class="btn btn-border-gradient"><span class="btn-text-gradient--gold">Play Game</span></a>
 			</div>
