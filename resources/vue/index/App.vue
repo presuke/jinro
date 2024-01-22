@@ -124,10 +124,10 @@ a.btn-border-gradient {
 		<div style="margin:auto; position: relative;">
 
 			<img src="image/top2.png" style="max-width:600px; width:100%; height:auto;" />
-			<div class="btn-border-gradient-wrap btn-border-gradient-wrap--gold">
+			<div style="width:100%;" class="btn-border-gradient-wrap btn-border-gradient-wrap--gold">
 				<a href="./room/" class="btn btn-border-gradient"><span class="btn-text-gradient--gold">Play Game</span></a>
 			</div>
-			<div class="btn-border-gradient-wrap btn-border-gradient-wrap--gold">
+			<div style="width:100%;" class="btn-border-gradient-wrap btn-border-gradient-wrap--gold">
 				<a href="https://www.nicovideo.jp/watch/sm43303622" target="_blank" class="btn btn-border-gradient"><span class="btn-text-gradient--gold">How To</span></a>
 			</div>
 		</div>
