@@ -488,7 +488,7 @@ export default {
 					color="purple darken-4"
 					@click="se.Push.play(); form.room.step=1;"
 					>
-						部屋を作成する
+						部屋作成
 					</v-btn>
 					<v-btn
 					v-if="form.room.key != ''"
