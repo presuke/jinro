@@ -195,9 +195,6 @@ export default {
 							this.form.player.roomid = 0;
 							this.form.player.step = 3;
 						}else if(response.data.code !=undefined){
-							response.data.avators.forEach((avator) =>{
-								this.form.selection.selected.push(avator.sex + '_' + avator.img);
-							});
 							if(response.data.code == 1){
 								this.form.player.error = '同じ名前のプレイヤーが存在します。別の名前にしてください。';
 								this.se.Error.play();
@@ -209,6 +206,10 @@ export default {
 							else if(response.data.code == 3){
 								this.form.player.error = 'この枠はすでに登録済みです。別の枠で作成し直してください。（ページ再読み込み推奨）';
 								this.se.Error.play();
+							}else{
+								response.data.avators.forEach((avator) =>{
+									this.form.selection.selected.push(avator.sex + '_' + avator.img);
+								});
 							}
 						}
 						else if(response.data.error != undefined){
