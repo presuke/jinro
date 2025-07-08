@@ -21,9 +21,9 @@ export default {
 		room:{},
 		playersOnRoom: [],
 		error: '',
+		videoSource: '../video/attack.mp4',
+		imageOverlaySource: '../image/avatar/male/icon00.png',
 		form: {
-			videoSource: 'video/attack.mp4',
-			imageOverlaySource: 'image/avatar/male/icon00.png',
 			selection: {
 				sex: ['male', 'fmale'],
 				imgs: ['00','01','02','03','04','05','06','07','08','09','10','11','12'],
