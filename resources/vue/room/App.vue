@@ -15,6 +15,7 @@ export default {
 	},
 	data: () => ({
 		url: location.href,
+		rootPath: '',
 		isLoading: false,
 		rooms: [],
 		room:{},
@@ -66,6 +67,7 @@ export default {
 	}),
 	created: function () {
 		if(this.url.indexOf('/room') != -1){
+			this.rootPath = this.url.split('/room')[0];
 			let key = this.url.split('/room')[1];
 			if(key.indexOf('/') != -1 && key != '/'){
 				this.form.room.key = key.split('/')[1];
@@ -85,7 +87,7 @@ export default {
 			this.form.player.roomid = 0;
 			this.error = '';
 			axios
-				.get('/api/v1/room/getAll', this.param)
+				.get(this.rootPath + '/api/v1/room/getAll', this.param)
 				.then((response) => {
 					this.isLoading = false;
 					try {
@@ -114,7 +116,7 @@ export default {
 			this.form.player.roomid = 0;
 			this.error = '';
 			axios
-				.get('/api/v1/room/get', {
+				.get(this.rootPath + '/api/v1/room/get', {
 					params: this.form.room,
 				})
 				.then((response) => {
@@ -166,7 +168,7 @@ export default {
 				this.form.player = player;
 				this.form.player.step = 2;
 			}else{
-				location.href = '/play/' + player.id;
+				location.href = this.rootPath + '/play/' + player.id;
 			}
 		},
 		createPlayer(){
@@ -185,7 +187,7 @@ export default {
 				this.se.Error.play();
 			}else{
 				axios
-				.post('/api/v1/player/create', this.form.player)
+				.post(this.rootPath + '/api/v1/player/create', this.form.player)
 				.then((response) => {
 					try {
 						if(response.data.player != undefined){
@@ -247,13 +249,13 @@ export default {
 		createRoom(){
 			this.form.room.step = 3;
 			axios
-			.post('/api/v1/room/create', {
+			.post(this.rootPath + '/api/v1/room/create', {
 				params: this.form.room,
 			})
 			.then((response) => {
 				if(response.data.code == 0){
 					this.form.room.step = 4;
-					this.form.room.url = '/room/' + response.data.room.key;
+					this.form.room.url = this.rootPath + '/room/' + response.data.room.key;
 					this.se.Success.play();
 				}else{
 					this.form.room.step = (response.data.code == 8) ? 1 : 2;
@@ -272,7 +274,7 @@ export default {
 				return false;
 			}
 			axios
-			.post('/api/v1/room/restart', {
+			.post(this.rootPath + '/api/v1/room/restart', {
 				params: room.room,
 			})
 			.then((response) => {
@@ -294,7 +296,7 @@ export default {
 				return false;
 			}
 			axios
-			.post('/api/v1/room/remove', {
+			.post(this.rootPath + '/api/v1/room/remove', {
 				params: room.room,
 			})
 			.then((response) => {
@@ -521,7 +523,7 @@ export default {
 					</v-btn>
 					-->
 					<div id="video-container">
-						<video ref="videoPlayer" controls :src="videoSource" class="video-element"></video>
+						<video ref="videoPlayer" controls autoplay muted loop :src="videoSource" class="video-element"></video>
 						<img :src="imageOverlaySource" alt="Overlay Image" class="overlay-image" />
 					</div>
 					<v-btn
@@ -630,7 +632,7 @@ export default {
 								<div v-if="player.name != ''">
 									<div style="float: left;">
 										<img 
-										:src="'/image/avatar/' + player.sex + '/icon' + ( '00' + player.img ).slice( -2 ) + '.png'" 
+										:src="rootPath + '/image/avatar/' + player.sex + '/icon' + ( '00' + player.img ).slice( -2 ) + '.png'" 
 										class="rounded-circle"
 										Width="30"
 										Height="30"
@@ -643,7 +645,7 @@ export default {
 								<div v-else>
 									<div style="float: left;">
 										<img 
-										:src ="'/image/avatar/random.png'" 
+										:src ="rootPath + '/image/avatar/random.png'" 
 										class="rounded-circle"
 										Width="30"
 										Height="30"
@@ -735,7 +737,7 @@ export default {
 							>
 								<img 
 								:style="[(this.form.selection.selected.indexOf(form.player.sex + '_' + Number(img))) == -1 ? '' : 'filter:grayscale(1);']"
-								:src="'/image/avatar/' + form.player.sex + '/icon' + img + '.png'" 
+								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon' + img + '.png'" 
 								class="rounded-circle"
 								/>
 							</v-carousel-item>
@@ -770,7 +772,7 @@ export default {
 						</v-card-title>
 						<v-card-text>
 							<img 
-								:src="'/image/avatar/' + form.player.sex + '/icon' + ( '00' + form.player.img ).slice( -2 ) + '.png'" 
+								:src="rootPath + '/image/avatar/' + form.player.sex + '/icon' + ( '00' + form.player.img ).slice( -2 ) + '.png'" 
 								class="rounded-circle"
 								/>
 							<div>
