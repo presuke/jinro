@@ -51,17 +51,21 @@ class Player extends BaseController
                             'id' => $params['id']
                         ]
                     );
-                    $player->update(
-                        [
-                            'name' => $params['name'],
-                            'sex' => $params['sex'],
-                            'img' => $params['img'],
-                            'pass' => $params['pass'],
-                        ]
-                    );
-                    DB::commit();
-                    $ret['player'] = $player->first();
-                    $ret['msg'] = 'プレイヤーを作成しました！';
+                    if ($player->name != "") {
+                        $ret['code'] = 3;
+                    } else {
+                        $player->update(
+                            [
+                                'name' => $params['name'],
+                                'sex' => $params['sex'],
+                                'img' => $params['img'],
+                                'pass' => $params['pass'],
+                            ]
+                        );
+                        DB::commit();
+                        $ret['player'] = $player->first();
+                        $ret['msg'] = 'プレイヤーを作成しました！';
+                    }
                 }
             } catch (\Exception $e) {
                 $ret['code'] = 9;

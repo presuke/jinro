@@ -206,6 +206,10 @@ export default {
 								this.form.player.error = '同じアバターのプレイヤーが存在します。別のアバターを選択してください。';
 								this.se.Error.play();
 							}
+							else if(response.data.code == 3){
+								this.form.player.error = 'この枠はすでに登録済みです。別の枠で作成し直してください。（ページ再読み込み推奨）';
+								this.se.Error.play();
+							}
 						}
 						else if(response.data.error != undefined){
 							this.form.player.error = response.data.error.errorInfo;
