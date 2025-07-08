@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['http://localhost:8080', 'https://jinro.presuke.com'], // Vue.js アプリケーションの URL を追加
 
     'allowed_origins_patterns' => [],
 
