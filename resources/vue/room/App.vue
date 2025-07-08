@@ -22,6 +22,8 @@ export default {
 		playersOnRoom: [],
 		error: '',
 		form: {
+			videoSource: 'video/attack.mp4',
+			imageOverlaySource: 'image/avatar/male/icon00.png',
 			selection: {
 				sex: ['male', 'fmale'],
 				imgs: ['00','01','02','03','04','05','06','07','08','09','10','11','12'],
@@ -463,6 +465,42 @@ export default {
 	font-size: smaller;
 	color: red;
 }
+#video-container {
+  position: relative; /* 子要素（画像）を絶対位置で配置するために必要 */
+  width: 100%; /* 親要素の幅に合わせる */
+  max-width: 800px; /* 最大幅を設定（例） */
+  margin: 0 auto; /* 中央揃え */
+  padding-bottom: 56.25%; /* 16:9のアスペクト比を維持するためのハック (高さ = 幅 * 9 / 16) */
+  height: 0; /* padding-bottomと組み合わせてアスペクト比を維持 */
+  overflow: hidden; /* コンテナからはみ出るコンテンツを隠す */
+  background-color: #000; /* ビデオがロードされるまでの背景色 */
+  border-radius: 8px; /* 角丸 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* 影 */
+}
+
+/* ビデオ要素のスタイル */
+.video-element {
+  position: absolute; /* 親コンテナに合わせて配置 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* アスペクト比を維持しつつ、要素に収まるように調整 */
+  border-radius: 8px; /* 角丸 */
+}
+
+/* オーバーレイ画像のスタイル */
+.overlay-image {
+  position: absolute; /* 親コンテナに対して絶対位置で配置 */
+  top: 50%; /* 垂直方向の中央 */
+  left: 50%; /* 水平方向の中央 */
+  transform: translate(-50%, -50%); /* 自身のサイズに基づいて正確に中央に配置 */
+  max-width: 50%; /* オーバーレイ画像の最大幅（例：ビデオの半分） */
+  max-height: 50%; /* オーバーレイ画像の最大高さ（例：ビデオの半分） */
+  pointer-events: none; /* 画像をクリックしてもビデオのコントロールが反応するようにする */
+  opacity: 0.8; /* 透明度を設定（例） */
+  z-index: 1; /* ビデオの上に表示されるようにする */
+}
 </style>
 <template>
 	<div style="  max-width: 1024px; height: 100%; background-color: black; margin: 0 auto; font-family: 'Reggae One', cursive;">
@@ -484,6 +522,10 @@ export default {
 					部屋再読み込み
 					</v-btn>
 					-->
+					<div id="video-container">
+						<video ref="videoPlayer" controls :src="videoSource" class="video-element"></video>
+						<img :src="imageOverlaySource" alt="Overlay Image" class="overlay-image" />
+					</div>
 					<v-btn
 					color="purple darken-4"
 					@click="se.Push.play(); form.room.step=1;"
