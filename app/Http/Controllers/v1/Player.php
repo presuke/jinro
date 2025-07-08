@@ -51,7 +51,7 @@ class Player extends BaseController
                             'id' => $params['id']
                         ]
                     );
-                    if ($player->name != '') {
+                    if ($player['name'] != '') {
                         $ret['code'] = 3;
                     } else {
                         $player->update(
