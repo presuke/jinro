@@ -1213,7 +1213,6 @@ export default {
 						</div>
 					</div>
 				</v-img>
-				<v-card-text>
 					<ul 
 					style="margin-left:10px;list-style-type:none;"
 					v-for="message in this.dialog.result.action.message"
@@ -1223,7 +1222,6 @@ export default {
 							{{ message }}
 						</li>
 					</ul>
-				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn
