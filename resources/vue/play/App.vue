@@ -798,10 +798,14 @@ export default {
 
 /* オーバーレイ画像のスタイル */
 .overlay-image {
-  pointer-events: none; /* 画像をクリックしてもビデオのコントロールが反応するようにする */
-  opacity: 0.8; /* 透明度を設定（例） */
-  border-radius: 50%;
-  z-index: 1; /* ビデオの上に表示されるようにする */
+	pointer-events: none; /* 画像をクリックしてもビデオのコントロールが反応するようにする */
+	opacity: 0.8; /* 透明度を設定（例） */
+	width:min(12vw, 12vh);
+	height:min(12vw, 12vh);
+	max-width:104px;
+	max-height:104px;
+	border-radius:50%;
+	z-index: 1; /* ビデオの上に表示されるようにする */
 }
 </style>
 <template>
@@ -1162,6 +1166,7 @@ export default {
 		transition="dialog-top-transition"
 		max-width="500"
 		>
+		
 			<v-card 
 			maxWidth="500" 
 			:height="(this.dialog.result.action.attackedPlayers.length > 0 ? 400 : 0) + (this.dialog.result.action.freedomPlayers.length > 0 ? 400 : 0)">
