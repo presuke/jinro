@@ -1142,9 +1142,7 @@ export default {
 					class="icon overlay-image"
 					/>
 				</v-img>
-				<v-card-text 
-				:style="{ backgroundImage: 'url(' + rootPath + '/image/jail.jpg)' }"
-				class="jail">
+				<v-card-text>
 				{{ this.dialog.result.vote.player.name }}さんが投獄されました。
 				</v-card-text>
 				<v-card-actions>
