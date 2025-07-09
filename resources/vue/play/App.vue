@@ -1167,7 +1167,9 @@ export default {
 		transition="dialog-top-transition"
 		max-width="500"
 		>
-			<v-card maxWidth="500" height="500">
+			<v-card 
+			maxWidth="500" 
+			:height="(this.dialog.result.action.attackedPlayers.length > 0 ? 400 : 0) + (this.dialog.result.action.freedomPlayers.length > 0 ? 400 : 0)">
 				<v-card-title>
 					結果
 				</v-card-title>
@@ -1183,7 +1185,7 @@ export default {
 						:key="player"
 						>
 							<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
-							class="icon"
+							class="icon overlay-image"
 							/>
 							<div>
 								{{ player.name }}
@@ -1203,7 +1205,7 @@ export default {
 						:key="player"
 						>
 							<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
-							class="icon"
+							class="icon overlay-image"
 							/>
 							<div>
 								{{ player.name }}
