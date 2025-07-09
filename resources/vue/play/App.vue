@@ -1172,13 +1172,6 @@ export default {
 					結果
 				</v-card-title>
 				<v-img>
-					<img 
-					:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
-					class="icon overlay-image"
-					/>
-				</v-img>
-
-				<v-card-text>
 					<div v-if="this.dialog.result.action.attackedPlayers.length > 0"
 					:style="{ backgroundImage: 'url(' + rootPath + '/image/jail.jpg)' }"
 					class="confine">
@@ -1229,7 +1222,7 @@ export default {
 					</ul>
 				<!--
 				-->
-				</v-card-text>
+				</v-img>
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn
