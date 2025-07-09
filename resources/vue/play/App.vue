@@ -1138,7 +1138,7 @@ export default {
 					投票結果
 				</v-card-title>
 				<v-img>
-					<video ref="videoPlayer" playsinline autoplay muted loop :src="video.punish" class="video-element"></video>
+					<video ref="videoPlayer" playsinline autoplay muted loop :src="video.attack" class="video-element"></video>
 					<img 
 					:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
 					class="icon overlay-image"
