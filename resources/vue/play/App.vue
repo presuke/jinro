@@ -121,6 +121,9 @@ export default {
 			},
 		},
 		se: Const.data.se,
+		video: {
+			attack: '../video/attack.mp4',
+		},
 		ret:{}
 	}),
 	created() {
@@ -765,6 +768,44 @@ export default {
 <style type="scss" scoped>
 @import '../../scss/play.scss';
 </style>
+<style>
+#video-container {
+  position: relative; /* 子要素（画像）を絶対位置で配置するために必要 */
+  width: 100%; /* 親要素の幅に合わせる */
+  max-width: 800px; /* 最大幅を設定（例） */
+  margin: 0 auto; /* 中央揃え */
+  padding-bottom: 56.25%; /* 16:9のアスペクト比を維持するためのハック (高さ = 幅 * 9 / 16) */
+  height: 0; /* padding-bottomと組み合わせてアスペクト比を維持 */
+  overflow: hidden; /* コンテナからはみ出るコンテンツを隠す */
+  background-color: #000; /* ビデオがロードされるまでの背景色 */
+  border-radius: 8px; /* 角丸 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* 影 */
+}
+
+/* ビデオ要素のスタイル */
+.video-element {
+  position: absolute; /* 親コンテナに合わせて配置 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* アスペクト比を維持しつつ、要素に収まるように調整 */
+  border-radius: 8px; /* 角丸 */
+}
+
+/* オーバーレイ画像のスタイル */
+.overlay-image {
+  position: absolute; /* 親コンテナに対して絶対位置で配置 */
+  top: 50%; /* 垂直方向の中央 */
+  left: 50%; /* 水平方向の中央 */
+  transform: translate(-50%, -50%); /* 自身のサイズに基づいて正確に中央に配置 */
+  max-width: 50%; /* オーバーレイ画像の最大幅（例：ビデオの半分） */
+  max-height: 50%; /* オーバーレイ画像の最大高さ（例：ビデオの半分） */
+  pointer-events: none; /* 画像をクリックしてもビデオのコントロールが反応するようにする */
+  opacity: 0.8; /* 透明度を設定（例） */
+  z-index: 1; /* ビデオの上に表示されるようにする */
+}
+</style>
 <template>
 	<div 
 	id="app" 
@@ -1097,10 +1138,12 @@ export default {
 				<v-card-text 
 				:style="{ backgroundImage: 'url(' + rootPath + '/image/jail.jpg)' }"
 				class="jail">
-					{{ this.dialog.result.vote.player.name }}さんが投獄されました。
-					<img :src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
-					class="icon"
+					<video ref="videoPlayer" controls autoplay muted loop :src="video.attack" class="video-element"></video>
+					<img 
+					:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
+					class="icon overlay-image"
 					/>
+				{{ this.dialog.result.vote.player.name }}さんが投獄されました。
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>

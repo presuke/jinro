@@ -21,8 +21,6 @@ export default {
 		room:{},
 		playersOnRoom: [],
 		error: '',
-		videoSource: '../video/attack.mp4',
-		imageOverlaySource: '../image/avatar/male/icon00.png',
 		form: {
 			selection: {
 				sex: ['male', 'fmale'],
@@ -470,6 +468,7 @@ export default {
 	font-size: smaller;
 	color: red;
 }
+
 #video-container {
   position: relative; /* 子要素（画像）を絶対位置で配置するために必要 */
   width: 100%; /* 親要素の幅に合わせる */
@@ -519,18 +518,6 @@ export default {
 			class="step" 
 			:class="[form.room.step==0 ? 'scaleShow' : 'scaleHide']">
 				<div style="margin-top:10px;">
-					<!--
-					<v-btn
-					color="purple darken-4"
-					@click="se.Push.play(); loadRooms();"
-					>
-					部屋再読み込み
-					</v-btn>
-					-->
-					<div id="video-container">
-						<video ref="videoPlayer" controls autoplay muted loop :src="videoSource" class="video-element"></video>
-						<img :src="imageOverlaySource" alt="Overlay Image" class="overlay-image" />
-					</div>
 					<v-btn
 					color="purple darken-4"
 					@click="se.Push.play(); form.room.step=1;"
