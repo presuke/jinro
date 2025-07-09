@@ -1138,10 +1138,10 @@ export default {
 					投票結果
 				</v-card-title>
 				<v-card-subtitle>
-					{{ this.dialog.result.vote.player.name }}さんが投獄されました。
+					{{ this.dialog.result.vote.player.name }}さんが処刑されました。
 				</v-card-subtitle>
 				<v-img>
-					<video ref="videoPlayer" playsinline autoplay muted loop :src="video.punish" class="video-element"></video>
+					<video ref="videoPlayer" playsinline autoplay muted :src="video.punish" class="video-element"></video>
 					<img 
 					:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
 					class="icon overlay-image"
@@ -1165,31 +1165,29 @@ export default {
 		v-model="this.dialog.result.action.show"
 		transition="dialog-top-transition"
 		max-width="500"
+		v-if="this.dialog.result.action.attackedPlayers.length > 0"
 		>
 			<v-card maxWidth="500" height="500">
 				<v-card-title>
-					結果
+					人狼襲撃結果
 				</v-card-title>
-				<v-card-text>
-					<div v-if="this.dialog.result.action.attackedPlayers.length > 0"
-					:style="{ backgroundImage: 'url(' + rootPath + '/image/jail.jpg)' }"
-					class="confine">
-						以下のプレイヤーが人狼に拉致されて投獄されました。
-						<div style="clear:left;">
-							<div
-							style="float:left;text-align:center;"
-							v-for="player in this.dialog.result.action.attackedPlayers"
-							:key="player"
-							>
-								<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
-								class="icon"
-								/>
-								<div>
-									{{ player.name }}
-								</div>
-							</div>
+				<v-img>
+					<video ref="videoPlayer" playsinline autoplay muted :src="video.attack" class="video-element"></video>
+					<div
+					style="float:left;text-align:center;"
+					v-for="player in this.dialog.result.action.attackedPlayers"
+					:key="player"
+					>
+						<img 
+						:src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+						class="icon overlay-image"
+						/>
+						<div>
+							{{ player.name }}
 						</div>
 					</div>
+				</v-img>
+				<v-card-text>
 					<div v-if="this.dialog.result.action.freedomPlayers.length > 0"
 					:style="{ backgroundImage: 'url(' + rootPath + '/image/freedom.jpg)' }"
 					class="freedom">
