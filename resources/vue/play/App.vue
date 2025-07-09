@@ -797,12 +797,6 @@ export default {
 
 /* オーバーレイ画像のスタイル */
 .overlay-image {
-  position: absolute; /* 親コンテナに対して絶対位置で配置 */
-  top: 50%; /* 垂直方向の中央 */
-  left: 50%; /* 水平方向の中央 */
-  transform: translate(-50%, -50%); /* 自身のサイズに基づいて正確に中央に配置 */
-  max-width: 50%; /* オーバーレイ画像の最大幅（例：ビデオの半分） */
-  max-height: 50%; /* オーバーレイ画像の最大高さ（例：ビデオの半分） */
   pointer-events: none; /* 画像をクリックしてもビデオのコントロールが反応するようにする */
   opacity: 0.8; /* 透明度を設定（例） */
   border-radius: 50%;
@@ -1190,6 +1184,7 @@ export default {
 							<div>
 								{{ player.name }}
 							</div>
+							
 						</div>
 					</div>
 				</v-img>
