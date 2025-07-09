@@ -1172,7 +1172,6 @@ export default {
 					結果
 				</v-card-title>
 				<v-img>
-					<video ref="videoPlayer" playsinline autoplay muted :src="video.attack" class="video-element"></video>
 					<img 
 					:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
 					class="icon overlay-image"
@@ -1183,6 +1182,7 @@ export default {
 					<div v-if="this.dialog.result.action.attackedPlayers.length > 0"
 					:style="{ backgroundImage: 'url(' + rootPath + '/image/jail.jpg)' }"
 					class="confine">
+						<video ref="videoPlayer" playsinline autoplay muted :src="video.attack" class="video-element"></video>
 						以下のプレイヤーが人狼に拉致されて投獄されました。
 						<div style="clear:left;">
 							<div
