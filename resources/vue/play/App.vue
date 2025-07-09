@@ -1131,14 +1131,14 @@ export default {
 		transition="dialog-top-transition"
 		max-width="400"
 		>
-			<v-card width="320" height="400">
+			<v-card width="300" height="500">
 				<v-card-title>
 					投票結果
 				</v-card-title>
 				<v-card-text 
 				:style="{ backgroundImage: 'url(' + rootPath + '/image/jail.jpg)' }"
 				class="jail">
-					<video ref="videoPlayer" controls autoplay muted loop :src="video.attack" class="video-element"></video>
+					<video ref="videoPlayer" playsinline autoplay muted loop :src="video.attack" class="video-element"></video>
 					<img 
 					:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
 					class="icon overlay-image"
