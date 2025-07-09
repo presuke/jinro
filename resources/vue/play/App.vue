@@ -124,6 +124,7 @@ export default {
 		video: {
 			attack: '../video/attack.mp4',
 			punish: '../video/punish.mp4',
+			rescue: '../video/rescue.mp4',
 		},
 		ret:{}
 	}),
@@ -1176,6 +1177,77 @@ export default {
 					<div
 					style="float:left;text-align:center;"
 					v-for="player in this.dialog.result.action.attackedPlayers"
+					:key="player"
+					>
+						<img 
+						:src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+						class="icon overlay-image"
+						/>
+						<div>
+							{{ player.name }}
+						</div>
+					</div>
+				</v-img>
+				<v-card-text>
+					<div v-if="this.dialog.result.action.freedomPlayers.length > 0"
+					:style="{ backgroundImage: 'url(' + rootPath + '/image/freedom.jpg)' }"
+					class="freedom">
+						以下のプレイヤーが天使により救われました。
+						<div style="clear:left;">
+							<div 
+							style="float:left;text-align:center;"
+							v-for="player in this.dialog.result.action.freedomPlayers"
+							:key="player"
+							>
+								<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+								class="icon"
+								/>
+								<div>
+									{{ player.name }}
+								</div>
+							</div>
+						</div>
+					</div>
+					<ul 
+					style="margin-left:10px;list-style-type:none;"
+					v-for="message in this.dialog.result.action.message"
+					:key="message"
+					>
+						<li>
+							{{ message }}
+						</li>
+					</ul>
+				<!--
+				-->
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="blue-darken-1"
+					variant="text"
+					@click="this.act(this.const.actions.confirmActionResult); this.dialog.result.action.show = false;"
+					>
+						確認
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<v-dialog
+		v-model="this.dialog.result.action.show"
+		transition="dialog-top-transition"
+		max-width="500"
+		v-if="this.dialog.result.action.freedomPlayers.length > 0"
+		>
+			<v-card maxWidth="500" height="500">
+				<v-card-title>
+					天使救出結果
+				</v-card-title>
+				<v-img>
+					<video ref="videoPlayer" playsinline autoplay muted :src="video.rescue" class="video-element"></video>
+					<div
+					style="float:left;text-align:center;"
+					v-for="player in this.dialog.result.action.freedomPlayers"
 					:key="player"
 					>
 						<img 
