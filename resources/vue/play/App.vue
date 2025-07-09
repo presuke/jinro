@@ -793,6 +793,7 @@ export default {
   height: 100%;
   object-fit: contain; /* アスペクト比を維持しつつ、要素に収まるように調整 */
   border-radius: 8px; /* 角丸 */
+  z-index: -1;
 }
 
 /* オーバーレイ画像のスタイル */
@@ -1184,7 +1185,7 @@ export default {
 							<div>
 								{{ player.name }}
 							</div>
-							
+
 						</div>
 					</div>
 				</v-img>
