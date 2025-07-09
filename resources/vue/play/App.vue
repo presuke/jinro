@@ -1173,16 +1173,10 @@ export default {
 				</v-card-title>
 				<v-img>
 					<video ref="videoPlayer" playsinline autoplay muted :src="video.attack" class="video-element"></video>
-					<div
-					style="float:left;text-align:center;"
-					v-for="player in this.dialog.result.action.attackedPlayers"
-					:key="player"
-					>
-						<img 
-						:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
-						class="icon overlay-image"
-						/>
-					</div>
+					<img 
+					:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
+					class="icon overlay-image"
+					/>
 				</v-img>
 
 				<v-card-text>
