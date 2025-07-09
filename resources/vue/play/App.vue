@@ -123,6 +123,7 @@ export default {
 		se: Const.data.se,
 		video: {
 			attack: '../video/attack.mp4',
+			punish: '../video/punish.mp4'
 		},
 		ret:{}
 	}),
@@ -1135,16 +1136,16 @@ export default {
 				<v-card-title>
 					投票結果
 				</v-card-title>
+				<v-card-subtitle>
+				{{ this.dialog.result.vote.player.name }}さんが投獄されました。
+				</v-card-subtitle>
 				<v-img>
-					<video ref="videoPlayer" playsinline autoplay muted loop :src="video.attack" class="video-element"></video>
+					<video ref="videoPlayer" playsinline autoplay muted loop :src="video.punish" class="video-element"></video>
 					<img 
 					:src="rootPath + '/image/avatar/' + this.dialog.result.vote.player.sex + '/icon' + this.dialog.result.vote.player.img.toString().padStart( 2, '0') + '.png'"
 					class="icon overlay-image"
 					/>
 				</v-img>
-				<v-card-text>
-				{{ this.dialog.result.vote.player.name }}さんが投獄されました。
-				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn
