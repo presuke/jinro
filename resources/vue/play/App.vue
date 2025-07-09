@@ -123,7 +123,7 @@ export default {
 		se: Const.data.se,
 		video: {
 			attack: '../video/attack.mp4',
-			punish: '../video/punish.mp4'
+			punish: '../video/punish.mp4',
 		},
 		ret:{}
 	}),
@@ -804,6 +804,7 @@ export default {
   max-height: 50%; /* オーバーレイ画像の最大高さ（例：ビデオの半分） */
   pointer-events: none; /* 画像をクリックしてもビデオのコントロールが反応するようにする */
   opacity: 0.8; /* 透明度を設定（例） */
+  border-radius: 50%;
   z-index: 1; /* ビデオの上に表示されるようにする */
 }
 </style>
@@ -1136,9 +1137,6 @@ export default {
 				<v-card-title>
 					投票結果
 				</v-card-title>
-				<v-card-subtitle>
-				{{ this.dialog.result.vote.player.name }}さんが投獄されました。
-				</v-card-subtitle>
 				<v-img>
 					<video ref="videoPlayer" playsinline autoplay muted loop :src="video.punish" class="video-element"></video>
 					<img 
@@ -1146,6 +1144,9 @@ export default {
 					class="icon overlay-image"
 					/>
 				</v-img>
+				<v-card-text>
+					{{ this.dialog.result.vote.player.name }}さんが投獄されました。
+				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn
