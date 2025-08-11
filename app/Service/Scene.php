@@ -253,6 +253,7 @@ class Scene
           }
         }
       }
+      $ret['result'] = $result;
     } catch (\Exception $ex) {
       $ret['code'] = 99;
       $ret['error'] = $ex->getMessage();
