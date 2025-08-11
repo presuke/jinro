@@ -1184,15 +1184,15 @@ export default {
 					v-if="this.dialog.result.action.attackedPlayers.length > 0"
 					>
 						<video ref="videoPlayer" playsinline autoplay muted loop :src="video.attack" class="video-element"></video>
-						以下のプレイヤーが人狼に襲撃されました。
 						<div style="clear:left;">
+							以下のプレイヤーが人狼に襲撃されました。
 							<div
 							style="float:left;text-align:center;"
 							v-for="player in this.dialog.result.action.attackedPlayers"
 							:key="player"
 							>
 								<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
-								class="icon overlay-image"
+								class="icon"
 								/>
 								<div>
 									{{ player.name }}
@@ -1204,15 +1204,15 @@ export default {
 					v-if="this.dialog.result.action.freedomPlayers.length > 0"
 					>
 						<video ref="videoPlayer" playsinline autoplay muted loop :src="video.rescue" class="video-element"></video>
-						以下のプレイヤーが天使により救われました。
 						<div style="clear:left;">
+							以下のプレイヤーが天使により救われました。
 							<div 
 							style="float:left;text-align:center;"
 							v-for="player in this.dialog.result.action.freedomPlayers"
 							:key="player"
 							>
 								<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
-								class="icon overlay-image"
+								class="icon"
 								/>
 								<div>
 									{{ player.name }}
