@@ -786,6 +786,9 @@ export default {
 
 /* ビデオ要素のスタイル */
 .video-element {
+  position: absolute; /* 親コンテナに合わせて配置 */
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: contain; /* アスペクト比を維持しつつ、要素に収まるように調整 */
@@ -796,11 +799,11 @@ export default {
 /* オーバーレイ画像のスタイル */
 .overlay-image {
 	pointer-events: none; /* 画像をクリックしてもビデオのコントロールが反応するようにする */
-	opacity: 0.8; /* 透明度を設定（例） */
-	width:min(12vw, 12vh);
-	height:min(12vw, 12vh);
-	max-width:104px;
-	max-height:104px;
+	opacity: 0.9; /* 透明度を設定（例） */
+	width:min(10vw, 10vh);
+	height:min(10vw, 10vh);
+	max-width:100px;
+	max-height:100px;
 	border-radius:50%;
 	z-index: 1; /* ビデオの上に表示されるようにする */
 }
@@ -1175,7 +1178,7 @@ export default {
 				height="400"
 				show-arrows="hover"
 				cycle
-				interval="5000"
+				interval="4500"
 				hide-delimiter-background
 				>
 					<v-carousel-item
