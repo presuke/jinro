@@ -214,6 +214,7 @@ class Scene
             $result['cntSave'] = $cntSave;
             $result['cntConsider'] = $cntConsider;
             $result['cntChange'] = $changes->count();
+            $result['saved'] = $saved;
             $result['attacked'] = [];
             $result['freedom'] = [];
             DB::beginTransaction();
