@@ -241,7 +241,6 @@ class Play extends BaseController
                                 //行動結果確認待ち中
                             case 3: {
                                     Scene::actionResult($ret, $room, $players, $me);
-                                    $ret['info']['test'] = 'in';
                                     break;
                                 }
                                 //勝敗

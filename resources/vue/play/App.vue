@@ -125,6 +125,7 @@ export default {
 			punish: '../video/punish.mp4',
 			attack: '../video/attack.mp4',
 			rescue: '../video/rescue.mp4',
+			saved: '../video/saved.mp4',
 		},
 		ret:{}
 	}),
@@ -1204,6 +1205,14 @@ export default {
 						</div>
 					</v-carousel-item>
 					<v-carousel-item
+					v-if="this.dialog.result.action.cntSave > 0"
+					>
+						<div>
+							狩人に守られたプレイヤーがいます。
+						</div>
+						<video ref="videoPlayer" playsinline autoplay muted loop :src="video.saved" class="video-element"></video>
+					</v-carousel-item>
+					<v-carousel-item
 					v-if="this.dialog.result.action.freedomPlayers.length > 0"
 					>
 						<div>
@@ -1385,7 +1394,7 @@ export default {
 
 		<div id="controll">
 			<div v-if="this.me.flgDead == 1">
-				あなたは投獄されています。他のプレイヤーの動向を見守りましょう
+				あなたは退場されています。他のプレイヤーの動向を見守りましょう
 			</div>
 			<div v-else>
 				<!--未入室-->
