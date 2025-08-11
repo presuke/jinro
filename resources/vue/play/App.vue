@@ -374,6 +374,10 @@ export default {
 											}
 										});
 									});
+									this.dialog.result.action.cntSave = action.cntSave;
+									this.dialog.result.action.cntChange = action.cntChange;
+									this.dialog.result.action.cntConsider = action.cntConsider;
+
 									let flgAttacked = this.dialog.result.action.attackedPlayers.length > 0;
 									let flgFreedom = this.dialog.result.action.freedomPlayers.length > 0;
 									let flgSaved = false;
