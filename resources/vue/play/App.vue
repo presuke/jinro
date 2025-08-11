@@ -786,10 +786,14 @@ export default {
 
 /* ビデオ要素のスタイル */
 .video-element {
+  position: absolute; /* 親コンテナに合わせて配置 */
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: contain; /* アスペクト比を維持しつつ、要素に収まるように調整 */
   border-radius: 8px; /* 角丸 */
+  z-index: -1;
 }
 
 /* オーバーレイ画像のスタイル */
@@ -1180,8 +1184,8 @@ export default {
 					v-if="this.dialog.result.action.attackedPlayers.length > 0"
 					>
 						<video ref="videoPlayer" playsinline autoplay muted loop :src="video.attack" class="video-element"></video>
-						<div style="clear:left;">
 						以下のプレイヤーが人狼に襲撃されました。
+						<div style="clear:left;">
 							<div
 							style="float:left;text-align:center;"
 							v-for="player in this.dialog.result.action.attackedPlayers"
@@ -1193,7 +1197,6 @@ export default {
 								<div>
 									{{ player.name }}
 								</div>
-
 							</div>
 						</div>
 					</v-carousel-item>
