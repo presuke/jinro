@@ -209,6 +209,7 @@ class Play extends BaseController
                             $players = $query->get();
                         }
 
+                        $ret['info']['ver'] = 1;
                         $ret['info']['time'] = $room->time;
                         foreach ($players as $player) {
                             if ($player->sex == '') {
@@ -218,7 +219,7 @@ class Play extends BaseController
 
                         //各タイムゾーンについて、状況に応じて値を付加する
                         switch ($ret['info']['time']) {
-                                //未入室者あり
+                            //未入室者あり
                             case -1: {
                                     $ret['info']['message'] = '未入室の人がいます。もう少し待ちましょう。';
                                     break;
