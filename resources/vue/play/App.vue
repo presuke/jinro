@@ -1173,32 +1173,27 @@ export default {
 				<v-card-title>
 					結果
 				</v-card-title>
+
 				<v-carousel
 				height="400"
 				show-arrows="hover"
 				cycle
 				hide-delimiter-background
 				>
-					<v-carousel-item>
-						<v-sheet
-						height="100%"
-						>
-							<div class="d-flex fill-height justify-center align-center">
-								<div class="text-h2">
-								the first
-								</div>
-							</div>
-						</v-sheet>
-						<v-sheet
-						height="100%"
-						>
-							<div class="d-flex fill-height justify-center align-center">
-								<div class="text-h2">
-								the 2nd
-								</div>
-							</div>
-						</v-sheet>
-					</v-carousel-item>
+					<v-carousel-item
+						src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
+						cover
+					></v-carousel-item>
+
+					<v-carousel-item
+						src="https://cdn.vuetifyjs.com/images/cards/hotel.jpg"
+						cover
+					></v-carousel-item>
+
+					<v-carousel-item
+						src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
+						cover
+					></v-carousel-item>
 				</v-carousel>
 
 
