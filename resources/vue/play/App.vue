@@ -1173,56 +1173,77 @@ export default {
 				<v-card-title>
 					結果
 				</v-card-title>
-				<v-img
-				v-if="this.dialog.result.action.attackedPlayers.length > 0"
+				<v-carousel
+				height="400"
+				show-arrows="hover"
+				cycle
+				hide-delimiter-background
 				>
-					<video ref="videoPlayer" playsinline autoplay muted :src="video.attack" class="video-element"></video>
-					以下のプレイヤーが人狼に拉致されて投獄されました。
-					<div style="clear:left;">
-						<div
-						style="float:left;text-align:center;"
-						v-for="player in this.dialog.result.action.attackedPlayers"
-						:key="player"
+					<v-carousel-item>
+						<v-sheet
+						:color="colors[i]"
+						height="100%"
 						>
-							<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
-							class="icon overlay-image"
-							/>
-							<div>
-								{{ player.name }}
-							</div>
+							<v-img
+							v-if="this.dialog.result.action.attackedPlayers.length > 0"
+							>
+								<video ref="videoPlayer" playsinline autoplay muted :src="video.attack" class="video-element"></video>
+								以下のプレイヤーが人狼に拉致されて投獄されました。
+								<div style="clear:left;">
+									<div
+									style="float:left;text-align:center;"
+									v-for="player in this.dialog.result.action.attackedPlayers"
+									:key="player"
+									>
+										<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+										class="icon overlay-image"
+										/>
+										<div>
+											{{ player.name }}
+										</div>
 
-						</div>
-					</div>
-				</v-img>
-				<v-img
-				v-if="this.dialog.result.action.freedomPlayers.length > 0"
-				>
-					<video ref="videoPlayer" playsinline autoplay muted :src="video.rescue" class="video-element"></video>
-					以下のプレイヤーが天使により救われました。
-					<div style="clear:left;">
-						<div 
-						style="float:left;text-align:center;"
-						v-for="player in this.dialog.result.action.freedomPlayers"
-						:key="player"
+									</div>
+								</div>
+							</v-img>
+						</v-sheet>
+					</v-carousel-item>
+					<v-carousel-item>
+						<v-sheet
+						:color="colors[i]"
+						height="100%"
 						>
-							<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
-							class="icon overlay-image"
-							/>
-							<div>
-								{{ player.name }}
-							</div>
-						</div>
-					</div>
-				</v-img>
-					<ul 
-					style="margin-left:10px;list-style-type:none;"
-					v-for="message in this.dialog.result.action.message"
-					:key="message"
-					>
-						<li>
-							{{ message }}
-						</li>
-					</ul>
+							<v-img
+							v-if="this.dialog.result.action.freedomPlayers.length > 0"
+							>
+								<video ref="videoPlayer" playsinline autoplay muted :src="video.rescue" class="video-element"></video>
+								以下のプレイヤーが天使により救われました。
+								<div style="clear:left;">
+									<div 
+									style="float:left;text-align:center;"
+									v-for="player in this.dialog.result.action.freedomPlayers"
+									:key="player"
+									>
+										<img :src="rootPath + '/image/avatar/' + player.sex + '/icon' + player.img.toString().padStart( 2, '0') + '.png'"
+										class="icon overlay-image"
+										/>
+										<div>
+											{{ player.name }}
+										</div>
+									</div>
+								</div>
+							</v-img>
+						</v-sheet>
+					</v-carousel-item>
+				</v-carousel>
+				<ul 
+				style="margin-left:10px;list-style-type:none;"
+				v-for="message in this.dialog.result.action.message"
+				:key="message"
+				>
+					<li>
+						{{ message }}
+					</li>
+				</ul>
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn
