@@ -786,9 +786,6 @@ export default {
 
 /* ビデオ要素のスタイル */
 .video-element {
-  position: absolute; /* 親コンテナに合わせて配置 */
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: contain; /* アスペクト比を維持しつつ、要素に収まるように調整 */
@@ -1178,6 +1175,7 @@ export default {
 				height="400"
 				show-arrows="hover"
 				cycle
+				interval="5000"
 				hide-delimiter-background
 				>
 					<v-carousel-item
