@@ -799,11 +799,11 @@ export default {
 /* オーバーレイ画像のスタイル */
 .overlay-image {
 	pointer-events: none; /* 画像をクリックしてもビデオのコントロールが反応するようにする */
-	opacity: 0.9; /* 透明度を設定（例） */
-	width:min(10vw, 10vh);
-	height:min(10vw, 10vh);
-	max-width:100px;
-	max-height:100px;
+	opacity: 0.8; /* 透明度を設定（例） */
+	width:min(12vw, 12vh);
+	height:min(12vw, 12vh);
+	max-width:104px;
+	max-height:104px;
 	border-radius:50%;
 	z-index: 1; /* ビデオの上に表示されるようにする */
 }
