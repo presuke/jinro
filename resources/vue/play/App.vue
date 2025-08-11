@@ -1183,8 +1183,8 @@ export default {
 					<v-carousel-item
 					v-if="this.dialog.result.action.attackedPlayers.length > 0"
 					>
-						<video ref="videoPlayer" playsinline autoplay muted :src="video.attack" class="video-element"></video>
-						以下のプレイヤーが人狼に拉致されて投獄されました。
+						<video ref="videoPlayer" playsinline autoplay muted loop :src="video.attack" class="video-element"></video>
+						以下のプレイヤーが人狼に襲撃されました。
 						<div style="clear:left;">
 							<div
 							style="float:left;text-align:center;"
@@ -1204,7 +1204,7 @@ export default {
 					<v-carousel-item
 					v-if="this.dialog.result.action.freedomPlayers.length > 0"
 					>
-						<video ref="videoPlayer" playsinline autoplay muted :src="video.rescue" class="video-element"></video>
+						<video ref="videoPlayer" playsinline autoplay muted loop :src="video.rescue" class="video-element"></video>
 						以下のプレイヤーが天使により救われました。
 						<div style="clear:left;">
 							<div 
