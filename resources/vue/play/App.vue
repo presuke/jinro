@@ -125,7 +125,7 @@ export default {
 			punish: '../video/punish.mp4',
 			attack: '../video/attack.mp4',
 			rescue: '../video/rescue.mp4',
-			saved: '../video/saved.mp4',
+			save: '../video/save.mp4',
 		},
 		ret:{}
 	}),
@@ -1214,7 +1214,7 @@ export default {
 						<div>
 							狩人に守られたプレイヤーがいます。
 						</div>
-						<video ref="videoPlayer" playsinline autoplay muted loop :src="video.saved" class="video-element"></video>
+						<video ref="videoPlayer" playsinline autoplay muted loop :src="video.save" class="video-element"></video>
 					</v-carousel-item>
 					<v-carousel-item
 					v-if="this.dialog.result.action.freedomPlayers.length > 0"
